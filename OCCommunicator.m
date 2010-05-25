@@ -8,6 +8,7 @@
 
 #import "OCCommunicator.h"
 #import "NSData+Base64.h"
+#import "NSArray+AtIndexOrNil.h"
 
 
 @implementation OCCommunicator
@@ -37,7 +38,10 @@
 	
 	//copy the ones we want to keep.
 	for(id key in keep) {
-		[bcDict setObject:[planDict objectForKey:key] forKey:key];
+		id obj;
+		if(obj = [planDict objectForKey:key]) {
+			[bcDict setObject:obj forKey:key];
+		}
 	}
 	
 	NSArray *tasks = [bcDict objectForKey:@"tasks"];
@@ -99,24 +103,27 @@
 			NSDictionary *primaryAssignment = [
 							[assignments filteredArrayUsingPredicate:
 								[NSPredicate predicateWithFormat:@"SELF.units == %@", [assignments valueForKeyPath:@"@max.units"]]
-						  	] objectAtIndex:0];
-			NSArray *convertToResource =
+						  	] objectOrNilAtIndex:0];
+			if(!primaryAssignment) { continue; }
+			NSArray *convertToResource = [
 							[resources filteredArrayUsingPredicate:
 								[NSPredicate predicateWithFormat:@"SELF.objectId == %@",
 									[primaryAssignment valueForKey:@"id"]]
-							];
-			[todo setObject: [convertToResource objectAtIndex:0] forKey:@"assignedPrimarilyTo"];
-			NSString *basecampId = [[task objectForKey:@"assignedPrimarilyTo"] valueForKeyPath:@"userData.Basecamp ID"];
+							] objectOrNilAtIndex:0];
+			if(!convertToResource) { continue; }
+			NSString *basecampId = [convertToResource valueForKeyPath:@"userData.Basecamp ID"];
 			if(basecampId) {
 				[todo setObject:basecampId forKey:@"responsible_party"];
 			}
 			[todo removeObjectForKey:@"assignments"];
-			[todo removeObjectForKey:@"assignedPrimarilyTo"];
+			[todo removeObjectForKey:@"effort"];
+			[todo removeObjectForKey:@"workTime"];
+			[todo setObject:[todo objectForKey:@"task"] forKey:@"name"];
+			[todo removeObjectForKey:@"task"];
+			
 		}
 		NSLog(@"finished a task");
 	}
-	
-	
 	
 	return nil;
 }

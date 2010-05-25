@@ -1,3 +1,0 @@
-/Users/stephenp/OmniCamp/OCCommunicator.m: In function '-[OCCommunicator postToBasecamp:error:]':
-/Users/stephenp/OmniCamp/OCCommunicator.m:127: warning: unused variable 'bcDictionary'
-/Users/stephenp/OmniCamp/OCCommunicator.m:128: warning: control reaches end of non-void function
