@@ -11,7 +11,9 @@
 		8D11072B0486CEB800E47090 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 089C165CFE840E0CC02AAC07 /* InfoPlist.strings */; };
 		8D11072D0486CEB800E47090 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 29B97316FDCFA39411CA2CEA /* main.m */; settings = {ATTRIBUTES = (); }; };
 		8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
+		A459B93C11AC6DE200822D7C /* ScriptingBridge.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A459B93B11AC6DE200822D7C /* ScriptingBridge.framework */; };
 		A499497911AB95EE00CE3D61 /* NSArray+AtIndexOrNil.m in Sources */ = {isa = PBXBuildFile; fileRef = A499497811AB95EE00CE3D61 /* NSArray+AtIndexOrNil.m */; };
+		A4AAD3E811AC50E7008370B3 /* NSArray+maximumValue.m in Sources */ = {isa = PBXBuildFile; fileRef = A4AAD3E711AC50E7008370B3 /* NSArray+maximumValue.m */; };
 		A4B10C1811AADEE10065BBD6 /* OCCommunicator.m in Sources */ = {isa = PBXBuildFile; fileRef = A4B10C1711AADEE10065BBD6 /* OCCommunicator.m */; };
 		A4B10C1C11AAE18E0065BBD6 /* OCDragView.m in Sources */ = {isa = PBXBuildFile; fileRef = A4B10C1B11AAE18E0065BBD6 /* OCDragView.m */; };
 		A4B10C2711AAE7070065BBD6 /* OCApp.m in Sources */ = {isa = PBXBuildFile; fileRef = A4B10C2611AAE7070065BBD6 /* OCApp.m */; };
@@ -29,8 +31,12 @@
 		32CA4F630368D1EE00C91783 /* OmniCamp_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OmniCamp_Prefix.pch; sourceTree = "<group>"; };
 		8D1107310486CEB800E47090 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		8D1107320486CEB800E47090 /* OmniCamp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = OmniCamp.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		A459B8E711AC66E400822D7C /* OmniPlan.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OmniPlan.h; sourceTree = "<group>"; };
+		A459B93B11AC6DE200822D7C /* ScriptingBridge.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ScriptingBridge.framework; path = /System/Library/Frameworks/ScriptingBridge.framework; sourceTree = "<absolute>"; };
 		A499497711AB95EE00CE3D61 /* NSArray+AtIndexOrNil.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSArray+AtIndexOrNil.h"; sourceTree = "<group>"; };
 		A499497811AB95EE00CE3D61 /* NSArray+AtIndexOrNil.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSArray+AtIndexOrNil.m"; sourceTree = "<group>"; };
+		A4AAD3E611AC50E7008370B3 /* NSArray+maximumValue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSArray+maximumValue.h"; sourceTree = "<group>"; };
+		A4AAD3E711AC50E7008370B3 /* NSArray+maximumValue.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSArray+maximumValue.m"; sourceTree = "<group>"; };
 		A4B10C1611AADEE10065BBD6 /* OCCommunicator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OCCommunicator.h; sourceTree = "<group>"; };
 		A4B10C1711AADEE10065BBD6 /* OCCommunicator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OCCommunicator.m; sourceTree = "<group>"; };
 		A4B10C1A11AAE18E0065BBD6 /* OCDragView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OCDragView.h; sourceTree = "<group>"; };
@@ -47,6 +53,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */,
+				A459B93C11AC6DE200822D7C /* ScriptingBridge.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -56,6 +63,7 @@
 		080E96DDFE201D6D7F000001 /* Classes */ = {
 			isa = PBXGroup;
 			children = (
+				A459B8E711AC66E400822D7C /* OmniPlan.h */,
 				A4B10C2811AAE9800065BBD6 /* NSData+Base64.h */,
 				A4B10C2911AAE9800065BBD6 /* NSData+Base64.m */,
 				A4B10C1611AADEE10065BBD6 /* OCCommunicator.h */,
@@ -66,6 +74,8 @@
 				A4B10C2611AAE7070065BBD6 /* OCApp.m */,
 				A499497711AB95EE00CE3D61 /* NSArray+AtIndexOrNil.h */,
 				A499497811AB95EE00CE3D61 /* NSArray+AtIndexOrNil.m */,
+				A4AAD3E611AC50E7008370B3 /* NSArray+maximumValue.h */,
+				A4AAD3E711AC50E7008370B3 /* NSArray+maximumValue.m */,
 			);
 			name = Classes;
 			sourceTree = "<group>";
@@ -73,6 +83,7 @@
 		1058C7A0FEA54F0111CA2CBB /* Linked Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				A459B93B11AC6DE200822D7C /* ScriptingBridge.framework */,
 				1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */,
 			);
 			name = "Linked Frameworks";
@@ -197,6 +208,7 @@
 				A4B10C2711AAE7070065BBD6 /* OCApp.m in Sources */,
 				A4B10C2A11AAE9800065BBD6 /* NSData+Base64.m in Sources */,
 				A499497911AB95EE00CE3D61 /* NSArray+AtIndexOrNil.m in Sources */,
+				A4AAD3E811AC50E7008370B3 /* NSArray+maximumValue.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

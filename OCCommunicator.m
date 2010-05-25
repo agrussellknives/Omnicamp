@@ -9,6 +9,9 @@
 #import "OCCommunicator.h"
 #import "NSData+Base64.h"
 #import "NSArray+AtIndexOrNil.h"
+#import "NSArray+maximumValue.h"
+#import "OmniPlan.h"
+#import "objc/runtime.h"
 
 
 @implementation OCCommunicator
@@ -16,11 +19,96 @@
 @synthesize userName;
 @synthesize passWord;
 
+-(id)init {
+	if(self = [super init]) {
+		tasks = [[NSArray alloc] init];
+		resources = [[NSArray alloc] init];
+		rootTasks = [[NSMutableArray alloc] init];
+		omniplanDate = [[NSDateFormatter alloc] initWithDateFormat:@"%Y%m%d%H%M%S" allowNaturalLanguage:NO];
+		basecampDate = [[NSDateFormatter alloc] initWithDateFormat:@"%Y-%m-%dT%H:%M:%SZ" allowNaturalLanguage:NO];
+		OmniPlanApp = [SBApplication applicationWithBundleIdentifier:@"com.omnigroup.OmniPlan"];
+	}
+	return self;
+}
+
+-(void)dealloc {
+	[tasks release];
+	[resources release];
+	[omniplanDate release];
+	[basecampDate release];
+	[rootTasks release];
+	[filePath release];
+	[super dealloc];
+}
+
 
 -(NSString *)getAuthString {
 	NSData *tempData = [[NSString stringWithFormat:@"%@:%@",userName,passWord] dataUsingEncoding:NSASCIIStringEncoding];
 	return [NSString stringWithFormat:@"BASIC %@",[tempData base64EncodedString]];
 }
+
+-(NSDictionary *)prerequisitesContainsRootTask:(NSArray *)prereqs {
+	NSDictionary *task;
+	for(task in prereqs) {
+		if([[prereqs filteredArrayUsingPredicate:
+						[NSPredicate predicateWithFormat:@"%@ in %@",task,rootTasks]
+					] count] != 0) {
+				// i one of my ancestors in the root task list.
+				return task;
+			}
+		}
+	// none of those prereqs are a root task;
+	return nil;
+}
+
+-(NSArray *)taskPrerequisitesFor:(NSDictionary *)task {
+	NSArray *prereqs = [task objectForKey:@"prerequisites"];
+	NSMutableArray *ancestors = [NSMutableArray arrayWithCapacity:5];
+	if(prereqs == nil) { 
+		return nil; 
+	}
+	else {
+		NSDictionary *prereq;
+		for(prereq in prereqs) {
+			NSDictionary *pretask =
+				[
+					[tasks filteredArrayUsingPredicate:
+						[NSPredicate predicateWithFormat:@"SELF.objectId == %@",[prereq objectForKey:@"id"]]
+					]
+				objectOrNilAtIndex:0];
+			if(pretask) { [ancestors addObject:pretask]; }
+		}
+	}
+	return ancestors;
+}
+
+-(double)getBranchValue:(NSDictionary *)task {
+	double branchValue = [[task objectForKey:@"workSeconds"] doubleValue];
+	double startTime;
+	NSMutableArray *maxBranch = [NSMutableArray arrayWithCapacity:50];
+		if([task objectForKey:@"prerequisites"]) {
+			NSDictionary *pre;
+			NSArray *prereqs = [self taskPrerequisitesFor:task];	
+			for(pre in prereqs) {
+				[maxBranch addObject:[NSNumber numberWithDouble:[self getBranchValue:pre]]];
+			}
+		}
+		else {
+			NSString *startDate = nil;
+			startDate = [task objectForKey:@"desiredStart"] ? [task objectForKey:@"desiredStart"] : [task objectForKey:@"forcedStart"];
+			if(!startDate) {
+				NSLog(@"Couldn't find a start time, using the earliest one");
+				startTime = [[omniplanDate dateFromString:[[rootTasks objectAtIndex:0] objectForKey:@"desiredStart"]] timeIntervalSince1970];
+			}
+			startTime + branchValue;
+			return startTime + branchValue;
+		}
+	return branchValue + [[maxBranch sum] doubleValue];
+}
+
+			
+		
+		
 
 -(NSDictionary *)decodeOmniPlanDict:(NSDictionary *)planDict {
 	// keys to keep from omniplan dictionary
@@ -33,6 +121,8 @@
 		@"taskUserKeys",
 		@"userData",
 		nil];
+		
+	OmniPlanDocument *theDoc = [OmniPlanApp open:filePath];
 	
 	NSMutableDictionary *bcDict = [NSMutableDictionary dictionary];
 	
@@ -44,15 +134,25 @@
 		}
 	}
 	
-	NSArray *tasks = [bcDict objectForKey:@"tasks"];
-	
-	NSMutableArray *resources = [NSMutableArray arrayWithArray:[bcDict objectForKey:@"resources"]];
+	tasks = [NSArray arrayWithArray:[bcDict objectForKey:@"tasks"]];
+	resources = [NSArray arrayWithArray:[bcDict objectForKey:@"resources"]];
 	
 	// page through the tasks and set the milestones.
 	NSMutableArray *milestones = [NSMutableArray arrayWithCapacity:50];
 	NSMutableArray *todolists = [NSMutableArray arrayWithCapacity:50];
 	NSMutableArray *todos = [NSMutableArray arrayWithCapacity:50];
-	NSDictionary *task;
+	NSMutableDictionary *task;
+	
+	
+		// root tasks
+	// there is generally only one of these, but there might be more.
+	
+	rootTasks = [NSMutableArray arrayWithCapacity:1];
+	for(task in tasks) {
+		if([task objectForKey:@"desiredStart"] && ![task objectForKey:@"prerequisites"]) {
+			[rootTasks addObject:task];
+		}
+	}
 	
 	for(task in tasks) {
 		id keyValue;
@@ -75,6 +175,22 @@
 		}
 		else if ([task objectForKey:@"children"]) {
 			[todolists addObject:[NSMutableDictionary dictionaryWithDictionary:task]];
+			// add this todolist to each of it's childrens prereqs so that we can calculate the date better
+			NSArray *childTasks = [tasks filteredArrayUsingPredicate:
+										[NSPredicate predicateWithFormat:@"SELF.objectId IN %@",[task objectForKey:@"children"]
+								  ]];
+			NSMutableDictionary *child;
+			for(child in childTasks) {
+				NSMutableArray *prerequisites;
+				if(prerequisites = [child objectForKey:@"prerequisites"]) {
+					[prerequisites addObject:[NSDictionary dictionaryWithObject:[task objectForKey:@"objectId"] forKey:@"id"]];
+				}
+				else {
+					[child setObject:[NSMutableArray arrayWithCapacity:5] forKey:@"prerequisites"];
+					NSLog(@"fixing to inser object");
+					[[child objectForKey:@"prerequisites"] addObject:[NSDictionary dictionaryWithObject:[task objectForKey:@"objectId"] forKey:@"id"]];
+				}
+			}
 		}
 		else {
 			NSLog(@"found a task type i don't know how to deal with.");
@@ -120,17 +236,35 @@
 			[todo removeObjectForKey:@"workTime"];
 			[todo setObject:[todo objectForKey:@"task"] forKey:@"name"];
 			[todo removeObjectForKey:@"task"];
+
 			
+			// calculate the due date by backing up the prereq chain until we find a "rootTask" - ie a task with
+			// no prerequisites  set it to the date farthest out.
+			/* [todo setObject:
+				[basecampDate stringFromDate:[NSDate dateWithTimeIntervalSince1970:
+					[self getBranchValue:todo]]
+				]
+				forKey:@"due-at"]; */
 		}
-		NSLog(@"finished a task");
-	}
-	
-	return nil;
-}
 	
 		
+		NSLog(@"finished a task");
+	}
+	NSLog(@"finished all tasks");
+	return todolists;
+}
+
+-(void)setFilePath:(NSString *)thePath {
+	filePath = [thePath retain];
+}
 
 -(BOOL)postToBasecamp:(NSDictionary *)planDict error:(NSError **)error {
-	NSDictionary *bcDictionary = [self decodeOmniPlanDict:planDict];
+	if([OmniPlanApp	isRunning]) {
+		NSDictionary *bcDictionary = [self decodeOmniPlanDict:planDict];
+	}
+	else {
+		NSRunAlertPanel(@"OmniPlan is not running", @"You should have Omniplan Running in order to use this application", nil, nil, nil);
+		return NO;
+	}
 }
 @end

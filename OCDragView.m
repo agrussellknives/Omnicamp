@@ -73,6 +73,7 @@
 			NSString *path = [[paste propertyListForType:@"NSFilenamesPboardType"] objectAtIndex:0];
 			NSString *pathToContents = [NSString stringWithFormat:@"%@/contents.xml",path];
 			NSDictionary *planDict  = [NSDictionary dictionaryWithContentsOfFile:pathToContents];
+			[theCommunicator setFilePath:path];
 			[theCommunicator postToBasecamp:planDict error:&error];
 		}
 		if([desiredType isEqualToString:NSURLPboardType]) {
