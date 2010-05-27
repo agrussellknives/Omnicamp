@@ -12,9 +12,10 @@
 @implementation OCApp
 
 - (void)awakeFromNib {
+	NSLog(@"app awoke");
 	[theCommunicator setUserName:[[[NSUserDefaultsController sharedUserDefaultsController] values] valueForKey:@"userName"]];
 	[theCommunicator setPassWord:[[[NSUserDefaultsController sharedUserDefaultsController] values] valueForKey:@"passWord"]];
-	[theCommunicator setUseScripting:(int)[[[NSUserDefaultsController sharedUserDefaultsController] values] valueForKey:@"useScripting"]];
+	[theCommunicator setUseScripting:[(NSNumber *)[[[NSUserDefaultsController sharedUserDefaultsController] values] valueForKey:@"useScripting"] intValue]];
 	
 	[self addObserver:self forKeyPath:@"userName" options:NSKeyValueObservingOptionNew context:nil];
 	[self addObserver:self forKeyPath:@"passWord" options:NSKeyValueObservingOptionNew context:nil];

@@ -7,7 +7,7 @@
 //
 
 #import <Cocoa/Cocoa.h>
-// #import "OmniPlan.h"
+#import "OmniplanParsing.h"
 #import "OPGlue/OPGlue.h"
 
 
@@ -18,20 +18,8 @@
 	@private int trackTime;
 	@private int notifyAssignees;
 	
-	NSArray *tasksArray;
-	NSArray *resourcesArray;
+	id<OmniplanParsing> OmniPlanParser;
 	
-	NSMutableArray *todoLists;
-	NSMutableArray *milestones;
-	
-	NSMutableArray *rootTasks;
-	
-	NSDateFormatter *omniplanDate;
-	NSDateFormatter *basecampDate;
-	
-	NSString *filePath;
-	
-	OPApplication *OmniPlanApp;
 }
 
 @property (copy) NSString *userName;
@@ -40,6 +28,8 @@
 @property int trackTime;
 @property int notifyAssignees;
 
--(BOOL)postToBasecamp:(NSDictionary *)planDict error:(NSError **)error;
+-(BOOL)postToBasecamp:(NSString *)filePath error:(NSError **)error;
+-(void)setFilePath:(NSString *)thePath;
+-(NSString *)filePath;
 
 @end

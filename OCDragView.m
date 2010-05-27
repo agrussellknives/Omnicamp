@@ -7,13 +7,13 @@
 //
 
 #import "OCDragView.h"
+#import "OCCommunicator.h";
 
 
 @implementation OCDragView
 
 - (id)initWithFrame:(NSRect)frame {
     self = [super initWithFrame:frame];
-	NSLog(@"oc drag view");
     if (self) {
         types = [[NSArray alloc] initWithObjects:NSFilenamesPboardType,NSURLPboardType,nil];
 		[self registerForDraggedTypes:types];
@@ -71,10 +71,8 @@
 		if([desiredType isEqualToString:NSFilenamesPboardType]) {
 			// we only operate on the first file
 			NSString *path = [[paste propertyListForType:@"NSFilenamesPboardType"] objectAtIndex:0];
-			NSString *pathToContents = [NSString stringWithFormat:@"%@/contents.xml",path];
-			NSDictionary *planDict  = [NSDictionary dictionaryWithContentsOfFile:pathToContents];
 			[theCommunicator setFilePath:path];
-			[theCommunicator postToBasecamp:planDict error:&error];
+			[theCommunicator postToBasecamp:path error:&error];
 		}
 		if([desiredType isEqualToString:NSURLPboardType]) {
 			NSLog(@"not implemented yet");
