@@ -14,9 +14,11 @@
 - (void)awakeFromNib {
 	[theCommunicator setUserName:[[[NSUserDefaultsController sharedUserDefaultsController] values] valueForKey:@"userName"]];
 	[theCommunicator setPassWord:[[[NSUserDefaultsController sharedUserDefaultsController] values] valueForKey:@"passWord"]];
+	[theCommunicator setUseScripting:(int)[[[NSUserDefaultsController sharedUserDefaultsController] values] valueForKey:@"useScripting"]];
 	
 	[self addObserver:self forKeyPath:@"userName" options:NSKeyValueObservingOptionNew context:nil];
 	[self addObserver:self forKeyPath:@"passWord" options:NSKeyValueObservingOptionNew context:nil];
+	[self addObserver:self forKeyPath:@"useScripting" options:NSKeyValueObservingOptionNew context:nil];
 }
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
@@ -25,6 +27,9 @@
 	}
 	else if ([keyPath compare:@"userName"] == NSOrderedSame) {
 		[theCommunicator setPassWord:[[[NSUserDefaultsController sharedUserDefaultsController] values] valueForKey:@"passWord"]];
+	}
+	else if ([keyPath compare:@"useScripting"] == NSOrderedSame) {
+		[theCommunicator setUseScripting:[[[NSUserDefaultsController sharedUserDefaultsController] values] boolForKey:@"useScripting"]];
 	}
 }
 

@@ -7,15 +7,22 @@
 //
 
 #import <Cocoa/Cocoa.h>
-#import "OmniPlan.h"
+// #import "OmniPlan.h"
+#import "OPGlue/OPGlue.h"
 
 
 @interface OCCommunicator : NSObject {
 	@private NSString* userName;
 	@private NSString* passWord;
+	@private int useScripting;
+	@private int trackTime;
+	@private int notifyAssignees;
 	
-	NSArray *tasks;
-	NSArray *resources;
+	NSArray *tasksArray;
+	NSArray *resourcesArray;
+	
+	NSMutableArray *todoLists;
+	NSMutableArray *milestones;
 	
 	NSMutableArray *rootTasks;
 	
@@ -24,11 +31,14 @@
 	
 	NSString *filePath;
 	
-	OmniPlanApplication *OmniPlanApp;
+	OPApplication *OmniPlanApp;
 }
 
 @property (copy) NSString *userName;
 @property (copy) NSString *passWord;
+@property int useScripting;
+@property int trackTime;
+@property int notifyAssignees;
 
 -(BOOL)postToBasecamp:(NSDictionary *)planDict error:(NSError **)error;
 

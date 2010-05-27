@@ -18,6 +18,12 @@
 		A4B10C1C11AAE18E0065BBD6 /* OCDragView.m in Sources */ = {isa = PBXBuildFile; fileRef = A4B10C1B11AAE18E0065BBD6 /* OCDragView.m */; };
 		A4B10C2711AAE7070065BBD6 /* OCApp.m in Sources */ = {isa = PBXBuildFile; fileRef = A4B10C2611AAE7070065BBD6 /* OCApp.m */; };
 		A4B10C2A11AAE9800065BBD6 /* NSData+Base64.m in Sources */ = {isa = PBXBuildFile; fileRef = A4B10C2911AAE9800065BBD6 /* NSData+Base64.m */; };
+		A4C50D1E11ADBF56008797CA /* OPApplicationGlue.m in Sources */ = {isa = PBXBuildFile; fileRef = A4C50D1411ADBF56008797CA /* OPApplicationGlue.m */; };
+		A4C50D1F11ADBF56008797CA /* OPCommandGlue.m in Sources */ = {isa = PBXBuildFile; fileRef = A4C50D1611ADBF56008797CA /* OPCommandGlue.m */; };
+		A4C50D2011ADBF56008797CA /* OPConstantGlue.m in Sources */ = {isa = PBXBuildFile; fileRef = A4C50D1811ADBF56008797CA /* OPConstantGlue.m */; };
+		A4C50D2111ADBF56008797CA /* OPReferenceGlue.m in Sources */ = {isa = PBXBuildFile; fileRef = A4C50D1B11ADBF56008797CA /* OPReferenceGlue.m */; };
+		A4C50D2211ADBF56008797CA /* OPReferenceRendererGlue.m in Sources */ = {isa = PBXBuildFile; fileRef = A4C50D1D11ADBF56008797CA /* OPReferenceRendererGlue.m */; };
+		A4C50D2411ADBF66008797CA /* Appscript.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A4C50D2311ADBF66008797CA /* Appscript.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -31,7 +37,6 @@
 		32CA4F630368D1EE00C91783 /* OmniCamp_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OmniCamp_Prefix.pch; sourceTree = "<group>"; };
 		8D1107310486CEB800E47090 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		8D1107320486CEB800E47090 /* OmniCamp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = OmniCamp.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		A459B8E711AC66E400822D7C /* OmniPlan.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OmniPlan.h; sourceTree = "<group>"; };
 		A459B93B11AC6DE200822D7C /* ScriptingBridge.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ScriptingBridge.framework; path = /System/Library/Frameworks/ScriptingBridge.framework; sourceTree = "<absolute>"; };
 		A499497711AB95EE00CE3D61 /* NSArray+AtIndexOrNil.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSArray+AtIndexOrNil.h"; sourceTree = "<group>"; };
 		A499497811AB95EE00CE3D61 /* NSArray+AtIndexOrNil.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSArray+AtIndexOrNil.m"; sourceTree = "<group>"; };
@@ -45,6 +50,19 @@
 		A4B10C2611AAE7070065BBD6 /* OCApp.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OCApp.m; sourceTree = "<group>"; };
 		A4B10C2811AAE9800065BBD6 /* NSData+Base64.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSData+Base64.h"; sourceTree = "<group>"; };
 		A4B10C2911AAE9800065BBD6 /* NSData+Base64.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSData+Base64.m"; sourceTree = "<group>"; };
+		A4C50D1211ADBF56008797CA /* OPAEMConstants.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OPAEMConstants.h; sourceTree = "<group>"; };
+		A4C50D1311ADBF56008797CA /* OPApplicationGlue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OPApplicationGlue.h; sourceTree = "<group>"; };
+		A4C50D1411ADBF56008797CA /* OPApplicationGlue.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OPApplicationGlue.m; sourceTree = "<group>"; };
+		A4C50D1511ADBF56008797CA /* OPCommandGlue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OPCommandGlue.h; sourceTree = "<group>"; };
+		A4C50D1611ADBF56008797CA /* OPCommandGlue.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OPCommandGlue.m; sourceTree = "<group>"; };
+		A4C50D1711ADBF56008797CA /* OPConstantGlue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OPConstantGlue.h; sourceTree = "<group>"; };
+		A4C50D1811ADBF56008797CA /* OPConstantGlue.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OPConstantGlue.m; sourceTree = "<group>"; };
+		A4C50D1911ADBF56008797CA /* OPGlue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OPGlue.h; sourceTree = "<group>"; };
+		A4C50D1A11ADBF56008797CA /* OPReferenceGlue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OPReferenceGlue.h; sourceTree = "<group>"; };
+		A4C50D1B11ADBF56008797CA /* OPReferenceGlue.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OPReferenceGlue.m; sourceTree = "<group>"; };
+		A4C50D1C11ADBF56008797CA /* OPReferenceRendererGlue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OPReferenceRendererGlue.h; sourceTree = "<group>"; };
+		A4C50D1D11ADBF56008797CA /* OPReferenceRendererGlue.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OPReferenceRendererGlue.m; sourceTree = "<group>"; };
+		A4C50D2311ADBF66008797CA /* Appscript.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Appscript.framework; path = /Library/Frameworks/Appscript.framework; sourceTree = "<absolute>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -54,6 +72,7 @@
 			files = (
 				8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */,
 				A459B93C11AC6DE200822D7C /* ScriptingBridge.framework in Frameworks */,
+				A4C50D2411ADBF66008797CA /* Appscript.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -63,7 +82,7 @@
 		080E96DDFE201D6D7F000001 /* Classes */ = {
 			isa = PBXGroup;
 			children = (
-				A459B8E711AC66E400822D7C /* OmniPlan.h */,
+				A4C50D1111ADBF56008797CA /* OPGlue */,
 				A4B10C2811AAE9800065BBD6 /* NSData+Base64.h */,
 				A4B10C2911AAE9800065BBD6 /* NSData+Base64.m */,
 				A4B10C1611AADEE10065BBD6 /* OCCommunicator.h */,
@@ -141,10 +160,30 @@
 		29B97323FDCFA39411CA2CEA /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				A4C50D2311ADBF66008797CA /* Appscript.framework */,
 				1058C7A0FEA54F0111CA2CBB /* Linked Frameworks */,
 				1058C7A2FEA54F0111CA2CBB /* Other Frameworks */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		A4C50D1111ADBF56008797CA /* OPGlue */ = {
+			isa = PBXGroup;
+			children = (
+				A4C50D1211ADBF56008797CA /* OPAEMConstants.h */,
+				A4C50D1311ADBF56008797CA /* OPApplicationGlue.h */,
+				A4C50D1411ADBF56008797CA /* OPApplicationGlue.m */,
+				A4C50D1511ADBF56008797CA /* OPCommandGlue.h */,
+				A4C50D1611ADBF56008797CA /* OPCommandGlue.m */,
+				A4C50D1711ADBF56008797CA /* OPConstantGlue.h */,
+				A4C50D1811ADBF56008797CA /* OPConstantGlue.m */,
+				A4C50D1911ADBF56008797CA /* OPGlue.h */,
+				A4C50D1A11ADBF56008797CA /* OPReferenceGlue.h */,
+				A4C50D1B11ADBF56008797CA /* OPReferenceGlue.m */,
+				A4C50D1C11ADBF56008797CA /* OPReferenceRendererGlue.h */,
+				A4C50D1D11ADBF56008797CA /* OPReferenceRendererGlue.m */,
+			);
+			path = OPGlue;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -209,6 +248,11 @@
 				A4B10C2A11AAE9800065BBD6 /* NSData+Base64.m in Sources */,
 				A499497911AB95EE00CE3D61 /* NSArray+AtIndexOrNil.m in Sources */,
 				A4AAD3E811AC50E7008370B3 /* NSArray+maximumValue.m in Sources */,
+				A4C50D1E11ADBF56008797CA /* OPApplicationGlue.m in Sources */,
+				A4C50D1F11ADBF56008797CA /* OPCommandGlue.m in Sources */,
+				A4C50D2011ADBF56008797CA /* OPConstantGlue.m in Sources */,
+				A4C50D2111ADBF56008797CA /* OPReferenceGlue.m in Sources */,
+				A4C50D2211ADBF56008797CA /* OPReferenceRendererGlue.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -240,6 +284,10 @@
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/../Desktop/appscript/src/Appscript/build/Release_10.5_32_64_GC_embed\"",
+				);
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_ENABLE_FIX_AND_CONTINUE = YES;
 				GCC_MODEL_TUNING = G5;
@@ -257,6 +305,10 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/../Desktop/appscript/src/Appscript/build/Release_10.5_32_64_GC_embed\"",
+				);
 				GCC_MODEL_TUNING = G5;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = OmniCamp_Prefix.pch;
