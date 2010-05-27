@@ -244,15 +244,15 @@
 	return nil;
 }
 
--(NSDictionary *)decodeOmniPlan:(id)thePlan {
-	NSDictionary *bcDict;
+-(NSMutableDictionary *)decodeOmniPlan:(id)thePlan {
+	NSMutableDictionary *bcDict;
 	if([thePlan isKindOfClass:[NSString class]]) {
 		NSString *pathToContents = [NSString stringWithFormat:@"%@/contents.xml",thePlan];
 		NSDictionary *planDict  = [NSDictionary dictionaryWithContentsOfFile:pathToContents];
-		bcDict = [self decodeOmniPlanDict:planDict];
+		bcDict = [NSMutableDictionary dictionaryWithDictionary:[self decodeOmniPlanDict:planDict]];
 	}
 	else if([thePlan isKindOfClass:[NSDictionary class]]) {
-		bcDict = [self decodeOmniPlanDict:thePlan];
+		bcDict = [NSMutableDictionary dictionaryWithDictionary:[self decodeOmniPlanDict:thePlan]];
 	}
 	else {
 		[NSException raise:@"Independent parser did not get a file path or dictionary for a plan." format:nil];

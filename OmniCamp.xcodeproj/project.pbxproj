@@ -11,10 +11,15 @@
 		8D11072B0486CEB800E47090 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 089C165CFE840E0CC02AAC07 /* InfoPlist.strings */; };
 		8D11072D0486CEB800E47090 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 29B97316FDCFA39411CA2CEA /* main.m */; settings = {ATTRIBUTES = (); }; };
 		8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
+		A456093311AF2FAC002583D6 /* NSInvocation(ForwardedConstruction).m in Sources */ = {isa = PBXBuildFile; fileRef = A456093211AF2FAC002583D6 /* NSInvocation(ForwardedConstruction).m */; };
 		A459B93C11AC6DE200822D7C /* ScriptingBridge.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A459B93B11AC6DE200822D7C /* ScriptingBridge.framework */; };
 		A45A1D3C11AEB99D00CE67D0 /* OCIndependentParser.m in Sources */ = {isa = PBXBuildFile; fileRef = A45A1D3B11AEB99D00CE67D0 /* OCIndependentParser.m */; };
 		A45A1D3F11AEB9B200CE67D0 /* OCDependentParser.m in Sources */ = {isa = PBXBuildFile; fileRef = A45A1D3E11AEB9B200CE67D0 /* OCDependentParser.m */; };
 		A45A1EBD11AED45400CE67D0 /* NSDictionary+serializeToXML.m in Sources */ = {isa = PBXBuildFile; fileRef = A45A1EBC11AED45400CE67D0 /* NSDictionary+serializeToXML.m */; };
+		A45A1EC211AEDC0A00CE67D0 /* ActiveSupportInflector.m in Sources */ = {isa = PBXBuildFile; fileRef = A45A1EC011AEDC0A00CE67D0 /* ActiveSupportInflector.m */; };
+		A45A1EC311AEDC0A00CE67D0 /* ActiveSupportInflector.plist in Resources */ = {isa = PBXBuildFile; fileRef = A45A1EC111AEDC0A00CE67D0 /* ActiveSupportInflector.plist */; };
+		A45A1EE211AEE5B800CE67D0 /* RegexKitLite.m in Sources */ = {isa = PBXBuildFile; fileRef = A45A1EE111AEE5B800CE67D0 /* RegexKitLite.m */; };
+		A45A208D11AF06AE00CE67D0 /* OCThrottledRequestor.m in Sources */ = {isa = PBXBuildFile; fileRef = A45A208C11AF06AE00CE67D0 /* OCThrottledRequestor.m */; };
 		A499497911AB95EE00CE3D61 /* NSArray+AtIndexOrNil.m in Sources */ = {isa = PBXBuildFile; fileRef = A499497811AB95EE00CE3D61 /* NSArray+AtIndexOrNil.m */; };
 		A4AAD3E811AC50E7008370B3 /* NSArray+maximumValue.m in Sources */ = {isa = PBXBuildFile; fileRef = A4AAD3E711AC50E7008370B3 /* NSArray+maximumValue.m */; };
 		A4B10C1811AADEE10065BBD6 /* OCCommunicator.m in Sources */ = {isa = PBXBuildFile; fileRef = A4B10C1711AADEE10065BBD6 /* OCCommunicator.m */; };
@@ -40,6 +45,8 @@
 		32CA4F630368D1EE00C91783 /* OmniCamp_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OmniCamp_Prefix.pch; sourceTree = "<group>"; };
 		8D1107310486CEB800E47090 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		8D1107320486CEB800E47090 /* OmniCamp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = OmniCamp.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		A456093111AF2FAC002583D6 /* NSInvocation(ForwardedConstruction).h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSInvocation(ForwardedConstruction).h"; sourceTree = "<group>"; };
+		A456093211AF2FAC002583D6 /* NSInvocation(ForwardedConstruction).m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSInvocation(ForwardedConstruction).m"; sourceTree = "<group>"; };
 		A459B93B11AC6DE200822D7C /* ScriptingBridge.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ScriptingBridge.framework; path = /System/Library/Frameworks/ScriptingBridge.framework; sourceTree = "<absolute>"; };
 		A45A1D3A11AEB99D00CE67D0 /* OCIndependentParser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OCIndependentParser.h; sourceTree = "<group>"; };
 		A45A1D3B11AEB99D00CE67D0 /* OCIndependentParser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OCIndependentParser.m; sourceTree = "<group>"; };
@@ -48,6 +55,13 @@
 		A45A1D4011AEBA2200CE67D0 /* OmniplanParsing.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OmniplanParsing.h; sourceTree = "<group>"; };
 		A45A1EBB11AED45400CE67D0 /* NSDictionary+serializeToXML.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSDictionary+serializeToXML.h"; sourceTree = "<group>"; };
 		A45A1EBC11AED45400CE67D0 /* NSDictionary+serializeToXML.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSDictionary+serializeToXML.m"; sourceTree = "<group>"; };
+		A45A1EBF11AEDC0A00CE67D0 /* ActiveSupportInflector.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ActiveSupportInflector.h; sourceTree = "<group>"; };
+		A45A1EC011AEDC0A00CE67D0 /* ActiveSupportInflector.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ActiveSupportInflector.m; sourceTree = "<group>"; };
+		A45A1EC111AEDC0A00CE67D0 /* ActiveSupportInflector.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist; path = ActiveSupportInflector.plist; sourceTree = "<group>"; };
+		A45A1EE011AEE5B800CE67D0 /* RegexKitLite.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RegexKitLite.h; sourceTree = "<group>"; };
+		A45A1EE111AEE5B800CE67D0 /* RegexKitLite.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RegexKitLite.m; sourceTree = "<group>"; };
+		A45A208B11AF06AE00CE67D0 /* OCThrottledRequestor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OCThrottledRequestor.h; sourceTree = "<group>"; };
+		A45A208C11AF06AE00CE67D0 /* OCThrottledRequestor.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OCThrottledRequestor.m; sourceTree = "<group>"; };
 		A499497711AB95EE00CE3D61 /* NSArray+AtIndexOrNil.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSArray+AtIndexOrNil.h"; sourceTree = "<group>"; };
 		A499497811AB95EE00CE3D61 /* NSArray+AtIndexOrNil.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSArray+AtIndexOrNil.m"; sourceTree = "<group>"; };
 		A4AAD3E611AC50E7008370B3 /* NSArray+maximumValue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSArray+maximumValue.h"; sourceTree = "<group>"; };
@@ -92,6 +106,12 @@
 		080E96DDFE201D6D7F000001 /* Classes */ = {
 			isa = PBXGroup;
 			children = (
+				A456093111AF2FAC002583D6 /* NSInvocation(ForwardedConstruction).h */,
+				A456093211AF2FAC002583D6 /* NSInvocation(ForwardedConstruction).m */,
+				A45A1EE011AEE5B800CE67D0 /* RegexKitLite.h */,
+				A45A1EE111AEE5B800CE67D0 /* RegexKitLite.m */,
+				A45A1EBF11AEDC0A00CE67D0 /* ActiveSupportInflector.h */,
+				A45A1EC011AEDC0A00CE67D0 /* ActiveSupportInflector.m */,
 				A4C50D1111ADBF56008797CA /* OPGlue */,
 				A4B10C2811AAE9800065BBD6 /* NSData+Base64.h */,
 				A4B10C2911AAE9800065BBD6 /* NSData+Base64.m */,
@@ -112,6 +132,8 @@
 				A45A1D4011AEBA2200CE67D0 /* OmniplanParsing.h */,
 				A45A1EBB11AED45400CE67D0 /* NSDictionary+serializeToXML.h */,
 				A45A1EBC11AED45400CE67D0 /* NSDictionary+serializeToXML.m */,
+				A45A208B11AF06AE00CE67D0 /* OCThrottledRequestor.h */,
+				A45A208C11AF06AE00CE67D0 /* OCThrottledRequestor.m */,
 			);
 			name = Classes;
 			sourceTree = "<group>";
@@ -167,6 +189,7 @@
 		29B97317FDCFA39411CA2CEA /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				A45A1EC111AEDC0A00CE67D0 /* ActiveSupportInflector.plist */,
 				8D1107310486CEB800E47090 /* Info.plist */,
 				089C165CFE840E0CC02AAC07 /* InfoPlist.strings */,
 				1DDD58140DA1D0A300B32029 /* MainMenu.xib */,
@@ -248,6 +271,7 @@
 			files = (
 				8D11072B0486CEB800E47090 /* InfoPlist.strings in Resources */,
 				1DDD58160DA1D0A300B32029 /* MainMenu.xib in Resources */,
+				A45A1EC311AEDC0A00CE67D0 /* ActiveSupportInflector.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -273,6 +297,10 @@
 				A45A1D3C11AEB99D00CE67D0 /* OCIndependentParser.m in Sources */,
 				A45A1D3F11AEB9B200CE67D0 /* OCDependentParser.m in Sources */,
 				A45A1EBD11AED45400CE67D0 /* NSDictionary+serializeToXML.m in Sources */,
+				A45A1EC211AEDC0A00CE67D0 /* ActiveSupportInflector.m in Sources */,
+				A45A1EE211AEE5B800CE67D0 /* RegexKitLite.m in Sources */,
+				A45A208D11AF06AE00CE67D0 /* OCThrottledRequestor.m in Sources */,
+				A456093311AF2FAC002583D6 /* NSInvocation(ForwardedConstruction).m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -316,6 +344,7 @@
 				GCC_PREFIX_HEADER = OmniCamp_Prefix.pch;
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "$(HOME)/Applications";
+				OTHER_LDFLAGS = "-licucore";
 				PRODUCT_NAME = OmniCamp;
 			};
 			name = Debug;
@@ -334,6 +363,7 @@
 				GCC_PREFIX_HEADER = OmniCamp_Prefix.pch;
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "$(HOME)/Applications";
+				OTHER_LDFLAGS = "-licucore";
 				PRODUCT_NAME = OmniCamp;
 			};
 			name = Release;

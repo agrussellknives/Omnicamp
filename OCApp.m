@@ -16,13 +16,18 @@
 	[theCommunicator setUserName:[[[NSUserDefaultsController sharedUserDefaultsController] values] valueForKey:@"userName"]];
 	[theCommunicator setPassWord:[[[NSUserDefaultsController sharedUserDefaultsController] values] valueForKey:@"passWord"]];
 	[theCommunicator setUseScripting:[(NSNumber *)[[[NSUserDefaultsController sharedUserDefaultsController] values] valueForKey:@"useScripting"] intValue]];
+	[theCommunicator setTrackTime:[(NSNumber *)[[[NSUserDefaultsController sharedUserDefaultsController] values] valueForKey:@"trackTime"] intValue]];
+	[theCommunicator setNotifyAssignees:[(NSNumber *)[[[NSUserDefaultsController sharedUserDefaultsController] values] valueForKey:@"notifyAssignees"] intValue]];
 	
 	[self addObserver:self forKeyPath:@"userName" options:NSKeyValueObservingOptionNew context:nil];
 	[self addObserver:self forKeyPath:@"passWord" options:NSKeyValueObservingOptionNew context:nil];
 	[self addObserver:self forKeyPath:@"useScripting" options:NSKeyValueObservingOptionNew context:nil];
+	[self addObserver:self forKeyPath:@"trackTime" options:NSKeyValueObservingOptionNew context:nil];
+	[self addObserver:self forKeyPath:@"notifyAssignees" options:NSKeyValueObservingOptionNew context:nil];
 }
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
+	NSLog(keyPath);
 	if([keyPath compare:@"userName"] == NSOrderedSame) {
 		[theCommunicator setUserName:[[[NSUserDefaultsController sharedUserDefaultsController] values] valueForKey:@"userName"]];
 	}
@@ -30,7 +35,15 @@
 		[theCommunicator setPassWord:[[[NSUserDefaultsController sharedUserDefaultsController] values] valueForKey:@"passWord"]];
 	}
 	else if ([keyPath compare:@"useScripting"] == NSOrderedSame) {
-		[theCommunicator setUseScripting:[[[NSUserDefaultsController sharedUserDefaultsController] values] boolForKey:@"useScripting"]];
+		NSLog(@"setting useScripting");
+		[theCommunicator setUseScripting:[(NSNumber *)[[[NSUserDefaultsController sharedUserDefaultsController] values] valueForKey:@"useScripting"] intValue]];
+	}
+	else if ([keyPath compare:@"trackTime"] == NSOrderedSame) {
+		[theCommunicator setTrackTime:[(NSNumber *)[[[NSUserDefaultsController sharedUserDefaultsController] values] valueForKey:@"trackTime"] intValue]];
+	}
+	else if ([keyPath compare:@"notifyAssignees"] == NSOrderedSame) {
+		NSLog(@"setting notifyAssignees");
+		[theCommunicator setNotifyAssignees:[(NSNumber *)[[[NSUserDefaultsController sharedUserDefaultsController] values] valueForKey:@"notifyAssignees"] intValue]];
 	}
 }
 

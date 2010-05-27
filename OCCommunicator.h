@@ -8,25 +8,31 @@
 
 #import <Cocoa/Cocoa.h>
 #import "OmniplanParsing.h"
+#import "OCThrottledRequestor.h"
 #import "OPGlue/OPGlue.h"
 
 
 @interface OCCommunicator : NSObject {
 	@private NSString* userName;
 	@private NSString* passWord;
+	@private NSString* basecampURL;
 	@private int useScripting;
 	@private int trackTime;
 	@private int notifyAssignees;
 	
 	id<OmniplanParsing> OmniPlanParser;
-	
+	NSMutableURLRequest *requestTemplate;
+	OCThrottledRequestor *requestor;
+	NSMutableDictionary *requestHistory;
 }
 
 @property (copy) NSString *userName;
 @property (copy) NSString *passWord;
+@property (copy) NSString *basecampURL;
 @property int useScripting;
 @property int trackTime;
 @property int notifyAssignees;
+@property (readonly) NSString *authString;
 
 -(BOOL)postToBasecamp:(NSString *)filePath error:(NSError **)error;
 -(void)setFilePath:(NSString *)thePath;

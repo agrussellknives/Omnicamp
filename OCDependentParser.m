@@ -73,6 +73,8 @@
 	
 	OPReference *task;
 	for(task in tasksElements) {
+		// get the basecamp Id for the task if one exists.
+		NSString *basecampId = [[[task customData] getItem] objectForKey:@"Basecamp ID"];
 		if([[task taskType] getItem] == [OPConstant milestoneTask]) {
 			NSMutableDictionary *milestoneDict = [NSMutableDictionary dictionaryWithCapacity:5];
 			[milestoneDict setObject:[[task name] getItem] forKey:@"title"];
@@ -81,7 +83,13 @@
 			if(responsibleParty = [self taskAssignedTo:task]) {
 				[milestoneDict setObject:responsibleParty forKey:@"responsible-party"];
 			}
+			if([communicator notifyAssignees] && responsibleParty) {
+				[milestoneDict setObject:@"true" forKey:@"notify"];
+			}
 			[milestoneDict setObject:[[task id_] getItem] forKey:@"objectId"];
+			if(basecampId) {
+				[milestoneDict setObject:basecampId forKey:@"id"];
+			}
 			[milestones addObject:milestoneDict];
 		}
 		if([[task taskType] getItem] == [OPConstant groupTask]) {
@@ -104,21 +112,28 @@
 				NSMutableArray *todoItems = [todolistDict objectForKey:@"todo-items"];
 				for(childTask in childTasks) {
 					NSMutableDictionary *todoItem = [NSMutableDictionary dictionaryWithCapacity:4];
+					NSString *todo_basecampId = [[[childTask customData] getItem] objectForKey:@"Basecamp ID"];
 					[todoItem setObject:[[childTask name] getItem] forKey:@"content"];
 					[todoItem setObject:[[childTask endingDate] getItem] forKey:@"due-at"];
 					NSString *responsibleParty;
 					if(responsibleParty = [self taskAssignedTo:childTask]) {
 						[todoItem setObject:responsibleParty forKey:@"responsible-party"];
 					}
-					if([communicator notifyAssignees]) {
+					if([communicator notifyAssignees] && responsibleParty) {
 						[todoItem setObject:@"true" forKey:@"notify"];
 					}
 					[todoItem setObject:[[childTask id_] getItem] forKey:@"objectId"];
+					if(basecampId) {
+						[todoItem setObject:todo_basecampId forKey:@"id"];
+					}
 					[todoItems addObject:todoItem];
 				}
 				[todolistDict setObject:[[task id_] getItem] forKey:@"objectId"];
 				if([childGroupsArray count] > 0) {
 					[todolistDict setObject:(NSArray *)[[childGroups id_] getItem] forKey:@"children"];
+				}
+				if(basecampId) {
+					[todolistDict setObject:basecampId forKey:@"id"];
 				}
 				[todoLists addObject:todolistDict];
 			}
@@ -132,11 +147,11 @@
 				
 			}
 		}
-		/* we ignore standardTasks because we add them under groupTasks */
+		/* we ignore standardTasks because we added them under groupTasks */
 	}
 	
 	/* "free tasks"  these are independent tasks that do not belong to task group (besides the root task group)
-	 in omniplan they are posted into todo_list called "general tasks" */
+	 in omniplan they are posted into a todo_list called "general tasks" */
 	NSArray *freeTasks = [[[[[OmniPlanApp documents] byID:fileId] childTasks] byTest:[[OPIts taskType] equals:[OPConstant standardTask]]] getItem];
 	// restrict scope
 	if([freeTasks count] > 0) {
@@ -155,7 +170,7 @@
 			if(responsibleParty = [self taskAssignedTo:task]) {
 				[todoItem setObject:responsibleParty forKey:@"responsible-party"];
 			}
-			if([communicator notifyAssignees]) {
+			if([communicator notifyAssignees] && responsibleParty) {
 				[todoItem setObject:@"true" forKey:@"notify"];
 			}
 			[todoItem setObject:[[task id_] getItem] forKey:@"objectId"];
@@ -169,7 +184,8 @@
 	// go back through the milestones and assign them to groupTasks if applicable
 	NSDictionary *milestone;
 	for(milestone in milestones) {
-		NSNumber *taskId = [milestone objectForKey:@"objectId"];
+		// use the basecamp id if it has one.
+		NSNumber *taskId = [milestone objectForKey:@"id"] ? [milestone objectForKey:@"id"] : [milestone objectForKey:@"objectId"];
 		// i use prs, pr because i can't specll prerequiisits.
 		NSArray *prs = [[[[[[[OmniPlanApp documents] byID:fileId] project] tasks] byID:taskId] prerequisites] getItem];
 		OPReference *pr;
@@ -190,13 +206,13 @@
 	return retDict;
 }
 
--(NSDictionary *)decodeOmniPlan:(id)thePlan {
-	NSDictionary *bcDict;
+-(NSMutableDictionary *)decodeOmniPlan:(id)thePlan {
+	NSMutableDictionary *bcDict;
 	if([thePlan isKindOfClass:[NSString class]]) {
 		[self setFilePath:thePlan];
 		OPReference *file = [[OmniPlanApp open_:[self filePath]] send];
 		[self setFileId:[[file id_] getItem]];
-		bcDict = [self decodeOmniPlanViaScript];
+		bcDict = [NSMutableDictionary dictionaryWithDictionary:[self decodeOmniPlanViaScript]];
 	}
 	else {
 		[NSException raise:@"Dependent parser did not get a file path for a plan." format:nil];
