@@ -54,6 +54,9 @@ static OCThrottledRequestor *sharedThrottledRequestor = NULL;
 	NSMutableDictionary *reqDict = [NSMutableDictionary dictionaryWithCapacity:2];
 	[reqDict setObject:request forKey:@"request"];
 	[reqDict setObject:owner forKey:@"owner"];
+	[requestQueue addObject:reqDict];
+	NSLog(@"adding to queue");
+	NSLog(@"%@",requestQueue);
 }
 	
 
@@ -89,6 +92,7 @@ static OCThrottledRequestor *sharedThrottledRequestor = NULL;
 	
 
 -(void)nextInQueue {
+	NSLog(@"making request");
 	if([requestQueue count] == 0) {
 		[self stopQueue];
 	}
@@ -110,6 +114,7 @@ static OCThrottledRequestor *sharedThrottledRequestor = NULL;
 }
 
 -(void)startQueue {
+	NSLog(@"starting queue");
 	if([requestTimer isValid]) {
 		// do nothing if we haven't stopped the queue
 		if(![self makeRequests]) {
@@ -118,6 +123,7 @@ static OCThrottledRequestor *sharedThrottledRequestor = NULL;
 		return;
 	}
 	else {
+		NSLog(@"setting timer");
 		requestTimer = [[NSTimer timerWithTimeInterval:requestDelay target:self selector:@selector(nextInQueue)
 			userInfo:nil repeats:YES] retain];
 	}

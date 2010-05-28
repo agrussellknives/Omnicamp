@@ -24,6 +24,8 @@
 	NSMutableURLRequest *requestTemplate;
 	OCThrottledRequestor *requestor;
 	NSMutableDictionary *requestHistory;
+	
+	NSMutableDictionary *bcDictionary;
 }
 
 @property (copy) NSString *userName;

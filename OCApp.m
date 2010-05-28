@@ -56,4 +56,8 @@
 	}
 }
 
+- (void)applicationDidFinishLaunching:(NSNotification *)aNotification {
+	[theCommunicator updateRequestTemplate];
+}
+
 @end

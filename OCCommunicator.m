@@ -34,7 +34,7 @@
 -(id)init {
 	if(self = [super init]) {
 		requestTemplate = [[NSMutableURLRequest alloc] initWithURL:[NSURL URLWithString:@""]];
-		requestHistory = [[NSMutableDictionary alloc] init];
+		requestHistory = [[NSMutableDictionary alloc] initWithCapacity:2];
 		requestor = [OCThrottledRequestor sharedThrottledRequestor];
 	}
 	return self;
@@ -56,7 +56,6 @@
 
 - (void)awakeFromNib {
 	NSLog(@"communicator awoke");
-	[self updateRequestTemplate];
 }
 
 -(void) updateParser {
@@ -99,24 +98,8 @@
 	[OmniPlanParser setFilePath:thePath];
 }
 
--(void)updateMilestoneDependenciesGivenMilestoneIds:(NSXMLDocument *)milestoneData {
-	
-}
-
--(void)uploadMilestones:(NSDictionary *)bcDictionary {
-	NSArray *newMilestones = [[bcDictionary objectForKey:@"milestones"] filteredArrayUsingPredicate:
-								[NSPredicate predicateWithFormat:@"SELF.basecampID == NIL"]];
-	NSXMLDocument *milestones = [newMilestones serializeToXMLWithRootNamed:@"request" tagName:@"milestone"];
-	NSMutableURLRequest *req = [[requestTemplate copy] autorelease];
-	[req setHTTPBody:[milestones XMLData]];
-	[requestHistory setObject:req forKey:@"uploadMilestones"];
-	[requestor addRequestToQueue:req];
-}
-
-
 
 -(BOOL)postToBasecamp:(NSString *)filePath error:(NSError **)error {
-	NSMutableDictionary *bcDictionary;
 	[self setFilePath:filePath];
 	
 	if(useScripting) {
@@ -130,54 +113,59 @@
 		bcDictionary = [OmniPlanParser decodeOmniPlan:filePath];
 		return NO;
 	}
+	[bcDictionary retain];
 	[bcDictionary writeToFile:@"/Users/stephenp/Desktop/bcdict.plist" atomically:YES];
 	NSLog(@"%@",bcDictionary);
 	
-	OCUploadPlan *thePlan = [[OCUploadPlan alloc] init];
-	// first step, set the URL
-	/* op types */
-		// update (xpath) - with path to replace, path to new value
-		// upload (xpath)
-		// set_path (URL) - url to upload too
-		// get (URL)
+													
 	
-	OCUploadOperation *setPathToProjects = [OCUploadOperation opWithType:@"set_path"];
-	[setPathToProjects setValue:[NSString stringWithFormat:@"%@/project/%@",basecampURL,[bcDictionary objectForKey:@"project-id"]] forOpInfo:@"new_path"];
+	// do milestones first...
+	[requestTemplate setURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@/projects/%@",basecampURL,[bcDictionary objectForKey:@"project-id"]]]];
 	
-	[thePlan addStep:[OCUploadStep stepWithOperation:setPathToProjects]];
-	OCUploadStep *milestoneStep = [OCUploadStep stepWithName:@"milestones" xPath:@"/milestones/milestone" op:@"upload"];
-	OCUploadStep *updateTodoMilestones = [OCUploadStep stepWithName:@"updatetdl_milestones" xPath:@"/todo-lists/todo-list" parent:milestoneStep];
-	OCUploadOperation *updateMileStoneOp = [OCUploadOperation opWithType:@"update"];
-	[updateMileStoneOp setValue:@"milestone-id" forOpInfo:@"replace"];
-	[updateMileStoneOp setValue:@"milestone[objectId=./milestone-id]/id" forOpInfo:@"with"];
-	[updateTodoMilestones setOperation:updateMileStoneOp];
-	
-	[thePlan addStep:milestoneStep];
-	[thePlan addStep:updateTodoMilestones];
-															
-	
-	/* // do milestones first...
-	NSXMLDocument *milestones = [[bcDictionary objectForKey:@"milestones"] serializeToXMLWithRootNamed:@"request"];
-	NSMutableURLRequest *req = [requestTemplate copy];]
-	[req setHTTPBody:[milestones XMLData]];
-	[requestor addRequestToQueue:req];
-	*/
-	NSString *whatever = nil;
-	NSData *planData = [NSKeyedArchiver archivedDataWithRootObject:thePlan];
-	NSData *xml = [NSPropertyListSerialization dataFromPropertyList:planData
-		format:NSPropertyListXMLFormat_v1_0 errorDescription:&whatever];
-	[xml writeToFile:@"/Users/stephenp/Desktop/plan.plist" atomically:NO];
-	
-	
-	
-	return NO;
+	NSArray *milestones = [bcDictionary objectForKey:@"milestones"];
+	NSMutableDictionary *milestone;
+	for(milestone in milestones) {
+		NSMutableURLRequest *req = [requestTemplate mutableCopy];
+		NSXMLDocument *msDoc = [NSXMLDocument documentWithRootElement:[NSXMLElement elementWithName:@"request"]];
+		NSXMLElement *msEl = [milestone serializeToXMLFragmentUsingTagName:@"milestone"];
+		[msDoc setChildren:[NSArray arrayWithObject:msEl]];
+		[req setHTTPBody:[msDoc XMLData]];
+		[milestone setObject:[NSNumber numberWithInt:201] forKey:@"expect"];
+		[milestone setObject:@"milestone" forKey:@"type"];
+		[requestHistory setObject:milestone forKey:req];
+		[requestor addRequestToQueue:req withOwner:self];
+	}
+	[requestor startQueue];
+			
+	return YES;
 }
 
+
+
 -(void)processData:(NSData *)data forRequest:(NSURLRequest *)req {
-	NSLog(@"%@",[[[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding] autorelease]);
+	NSMutableDictionary *obj = [requestHistory objectForKey:req];
+	NSError *error = nil;
+	if([[obj objectForKey:@"expect"] isEqualToString:@"ok"]) {
+		if([[obj objectForKey:@"type"] isEqualToString:@"milestone"]) {
+			// milestone path
+			NSXMLDocument *msRDoc = [[NSXMLDocument alloc] initWithData:data options:0 error:&error];
+			NSXMLNode *bcId = [[msRDoc nodesForXPath:@"id" error:&error] objectAtIndex:0];
+			NSMutableDictionary *todo_list;
+			NSArray *dpTodos = [[bcDictionary objectForKey:@"todo-lists"] filteredArrayUsingPredicate:
+				[NSPredicate predicateWithFormat:@"SELF.milestone-id == %@",[bcId stringValue]]];
+			for(todo_list in dpTodos) {
+				[todo_list setObject:[bcId stringValue] forKey:@"milestone-id"];
+			}
+			[self postTodosForMilestone:dpTodos];
+		}
+	}
 }
 -(void)processResponse:(NSHTTPURLResponse *)response forRequest:(NSURLRequest *)req {
-	NSLog(@"%@",response);
+	// retrieve our object
+	NSMutableDictionary *obj = [requestHistory objectForKey:req];
+	if(!([response statusCode] == [[obj objectForKey:@"expect"] intValue])) {
+		[obj setObject:@"ok" forKey:@"expect"];
+	}
 }
 
 @end
