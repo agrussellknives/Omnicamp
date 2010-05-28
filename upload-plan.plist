@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<array>
+	<dict>
+		<key>xpath</key>
+		<string>project/id</string>
+		<key>name</key>
+		<string>point-to-project</string>
+		<key>operation</key>
+		<dict>
+			<key>type</key>
+			<string>change-url</string>
+			<key>to</key>
+			<string>project/id</string>
+		</dict>
+		<key>dependents</key>
+		<array/>
+	</dict>
+	<dict>
+		<key>name</key>
+		<string>milestones</string>
+		<key>xpath</key>
+		<string>/milestones/miletone</string>
+		<key>operation</key>
+		<dict>
+			<key>type</key>
+			<string>upload</string>
+		</dict>
+		<key>dependents</key>
+		<array>
+			<dict>
+				<key>name</key>
+				<string>todo-lists</string>
+				<key>xpath</key>
+				<string>/todo-lists/todo-list[milestone-id={PARENT.object_id}]</string>
+				<key>operation</key>
+				<dict>
+					<key>type</key>
+					<string>update</string>
+					<key>update</key>
+					<string>{SELF.milestone-id}</string>
+					<key>with</key>
+					<string>{PARENT.id}</string>
+				</dict>
+			</dict>
+			<dict>
+				<key>name</key>
+				<string>todo-lists</string>
+				<key>xpath</key>
+				<string>/todo-lists/todo-list[milestone-id={PARENT.object_id}]</string>
+				<key>operation</key>
+				<dict>
+					<key>type</key>
+					<string>upload</string>
+				</dict>
+				<key>dependents</key>
+				<array>
+					<dict>
+						<key>New item</key>
+						<string></string>
+					</dict>
+					<dict>
+						<key>name</key>
+						<string>todo-items</string>
+						<key>xpath</key>
+						<string>todo-item</string>
+					</dict>
+				</array>
+			</dict>
+		</array>
+	</dict>
+</array>
+</plist>

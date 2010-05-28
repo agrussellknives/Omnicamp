@@ -17,6 +17,9 @@
 #import "OCDependentParser.h"
 #import "OCIndependentParser.h"
 #import "NSInvocation(ForwardedConstruction).h"
+#import "OCUploadPlan.h"
+#import "OCUploadStep.h"
+#import "OCUploadOperation.h"
 
 
 @implementation OCCommunicator
@@ -30,11 +33,9 @@
 
 -(id)init {
 	if(self = [super init]) {
-		requestTemplate = [[NSMutableURLRequest alloc] init];
+		requestTemplate = [[NSMutableURLRequest alloc] initWithURL:[NSURL URLWithString:@""]];
 		requestHistory = [[NSMutableDictionary alloc] init];
 		requestor = [OCThrottledRequestor sharedThrottledRequestor];
-		[self addObserver:self forKeyPath:@"userName" options:NSKeyValueObservingOptionNew context:nil];
-		[self addObserver:self forKeyPath:@"passWord" options:NSKeyValueObservingOptionNew context:nil];
 	}
 	return self;
 }
@@ -44,22 +45,18 @@
 	[super dealloc];
 }
 
-- (void)awakeFromNib {
-	NSLog(@"communicator awoke");
-
-}
 
 -(void) updateRequestTemplate {
 	[requestTemplate setHTTPMethod:@"POST"];
+	[requestTemplate setURL:[NSURL URLWithString:basecampURL]];
 	[requestTemplate setValue:[self authString] forHTTPHeaderField:@"Authorization"];
 	[requestTemplate setValue:@"application/xml" forHTTPHeaderField:@"Accept"];
 	[requestTemplate setValue:@"application/xml" forHTTPHeaderField:@"Content-Type"];
 }
 
-- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
-	if([keyPath isEqualToString:@"userName"] || [keyPath isEqualToString:@"passWord"]) {
-		[self updateRequestTemplate];
-	}
+- (void)awakeFromNib {
+	NSLog(@"communicator awoke");
+	[self updateRequestTemplate];
 }
 
 -(void) updateParser {
@@ -77,6 +74,11 @@
 	[OmniPlanParser setCommunicator:self];
 }
 	
+-(void)setBasecampURL:(NSString *)aString {
+	[basecampURL release];
+	basecampURL = [aString copy];
+	[self updateRequestTemplate];
+}
 
 -(void)setUseScripting:(int)use {
 	useScripting = use;
@@ -104,7 +106,7 @@
 -(void)uploadMilestones:(NSDictionary *)bcDictionary {
 	NSArray *newMilestones = [[bcDictionary objectForKey:@"milestones"] filteredArrayUsingPredicate:
 								[NSPredicate predicateWithFormat:@"SELF.basecampID == NIL"]];
-	NSXMLDocument *milestones = [newMilestones serializeToXMLWithRootNamed:@"request"];
+	NSXMLDocument *milestones = [newMilestones serializeToXMLWithRootNamed:@"request" tagName:@"milestone"];
 	NSMutableURLRequest *req = [[requestTemplate copy] autorelease];
 	[req setHTTPBody:[milestones XMLData]];
 	[requestHistory setObject:req forKey:@"uploadMilestones"];
@@ -131,15 +133,27 @@
 	[bcDictionary writeToFile:@"/Users/stephenp/Desktop/bcdict.plist" atomically:YES];
 	NSLog(@"%@",bcDictionary);
 	
-	NSMutableArray *invocationList;
-	/* get all milestones that aren't linked to basecamp miletones */
+	OCUploadPlan *thePlan = [[OCUploadPlan alloc] init];
+	// first step, set the URL
+	/* op types */
+		// update (xpath) - with path to replace, path to new value
+		// upload (xpath)
+		// set_path (URL) - url to upload too
+		// get (URL)
 	
-	/* when it's completed we want to */
-	NSInvocation *currentInvocation;
-	[[NSInvocation invocationWithTarget:self invocationOut:&currentInvocation]
-		uploadMilestones:bcDictionary];
-		
-	[currentInvocation invoke];
+	OCUploadOperation *setPathToProjects = [OCUploadOperation opWithType:@"set_path"];
+	[setPathToProjects setValue:[NSString stringWithFormat:@"%@/project/%@",basecampURL,[bcDictionary objectForKey:@"project-id"]] forOpInfo:@"new_path"];
+	
+	[thePlan addStep:[OCUploadStep stepWithOperation:setPathToProjects]];
+	OCUploadStep *milestoneStep = [OCUploadStep stepWithName:@"milestones" xPath:@"/milestones/milestone" op:@"upload"];
+	OCUploadStep *updateTodoMilestones = [OCUploadStep stepWithName:@"updatetdl_milestones" xPath:@"/todo-lists/todo-list" parent:milestoneStep];
+	OCUploadOperation *updateMileStoneOp = [OCUploadOperation opWithType:@"update"];
+	[updateMileStoneOp setValue:@"milestone-id" forOpInfo:@"replace"];
+	[updateMileStoneOp setValue:@"milestone[objectId=./milestone-id]/id" forOpInfo:@"with"];
+	[updateTodoMilestones setOperation:updateMileStoneOp];
+	
+	[thePlan addStep:milestoneStep];
+	[thePlan addStep:updateTodoMilestones];
 															
 	
 	/* // do milestones first...
@@ -148,6 +162,14 @@
 	[req setHTTPBody:[milestones XMLData]];
 	[requestor addRequestToQueue:req];
 	*/
+	NSString *whatever = nil;
+	NSData *planData = [NSKeyedArchiver archivedDataWithRootObject:thePlan];
+	NSData *xml = [NSPropertyListSerialization dataFromPropertyList:planData
+		format:NSPropertyListXMLFormat_v1_0 errorDescription:&whatever];
+	[xml writeToFile:@"/Users/stephenp/Desktop/plan.plist" atomically:NO];
+	
+	
+	
 	return NO;
 }
 

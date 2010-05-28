@@ -112,6 +112,9 @@ static OCThrottledRequestor *sharedThrottledRequestor = NULL;
 -(void)startQueue {
 	if([requestTimer isValid]) {
 		// do nothing if we haven't stopped the queue
+		if(![self makeRequests]) {
+			[self setMakeRequests:YES];
+		}
 		return;
 	}
 	else {

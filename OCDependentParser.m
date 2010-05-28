@@ -68,6 +68,14 @@
 
 -(NSDictionary *)decodeOmniPlanViaScript {
 	OPReference	*ref = [[[OmniPlanApp documents] byID:fileId] tasks];
+	NSString *projectID = [[[[[[OmniPlanApp documents] byID:fileId] project] customData] getItem] objectForKey:@"Basecamp ID"];
+	if(!projectID) {
+		NSRunAlertPanel(@"No Basecamp ID", @"Your Omniplan project does not have a Basecamp ID"
+						"Set the ID of the project you wish to sync to in a 'Basecamp ID' custom"
+						"data field in OmniPlan", nil, nil, nil);
+		return nil;
+	}
+	
 		
 	NSArray *tasksElements = [ref getItem];
 	
@@ -203,6 +211,7 @@
 	NSMutableDictionary *retDict = [NSMutableDictionary dictionaryWithCapacity:2];
 	[retDict setObject:milestones forKey:@"milestones"];
 	[retDict setObject:todoLists forKey:@"todo-lists"];
+	[retDict setObject:projectID forKey:@"project-id"];
 	return retDict;
 }
 

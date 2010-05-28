@@ -9,7 +9,7 @@
 		<object class="NSMutableArray" key="IBDocument.EditedObjectIDs">
 			<bool key="EncodedWithXMLCoder">YES</bool>
 			<integer value="57"/>
-			<integer value="462"/>
+			<integer value="490"/>
 			<integer value="451"/>
 		</object>
 		<object class="NSArray" key="IBDocument.PluginDependencies">
@@ -1351,7 +1351,7 @@
 											<bool key="NSEnabled">YES</bool>
 											<object class="NSTextFieldCell" key="NSCell" id="452984704">
 												<int key="NSCellFlags">-1805517311</int>
-												<int key="NSCellFlags2">272629760</int>
+												<int key="NSCellFlags2">272630272</int>
 												<string type="base64-UTF8" key="NSContents">aHR0cHM6Ly88d2hhdGV2ZXI+LmJhc2VjYW1waHEuY29tA</string>
 												<object class="NSFont" key="NSSupport" id="421278354">
 													<string key="NSName">LucidaGrande</string>
@@ -1508,10 +1508,6 @@
 				<string key="NSMaxSize">{3.40282e+38, 3.40282e+38}</string>
 			</object>
 			<object class="NSUserDefaultsController" id="270182720">
-				<object class="NSMutableArray" key="NSDeclaredKeys">
-					<bool key="EncodedWithXMLCoder">YES</bool>
-					<string>basecampURL</string>
-				</object>
 				<bool key="NSSharedInstance">YES</bool>
 			</object>
 			<object class="NSCustomObject" id="387917838">
@@ -3819,8 +3815,8 @@
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<string>{{791, 739}, {290, 308}}</string>
-					<string>{{791, 739}, {290, 308}}</string>
+					<string>{{645, 739}, {290, 308}}</string>
+					<string>{{645, 739}, {290, 308}}</string>
 					<reference ref="6"/>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>

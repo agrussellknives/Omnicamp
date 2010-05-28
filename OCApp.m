@@ -12,13 +12,19 @@
 @implementation OCApp
 
 - (void)awakeFromNib {
-	NSLog(@"app awoke");
+	[[NSUserDefaults standardUserDefaults] registerDefaults:
+		[[[NSDictionary alloc] initWithContentsOfFile:
+			[[NSBundle mainBundle] pathForResource:@"defaults" ofType:@"plist"]
+		 ] autorelease]
+	 ];
 	[theCommunicator setUserName:[[[NSUserDefaultsController sharedUserDefaultsController] values] valueForKey:@"userName"]];
 	[theCommunicator setPassWord:[[[NSUserDefaultsController sharedUserDefaultsController] values] valueForKey:@"passWord"]];
+	[theCommunicator setBasecampURL:[[[NSUserDefaultsController sharedUserDefaultsController] values] valueForKey:@"basecampURL"]];
 	[theCommunicator setUseScripting:[(NSNumber *)[[[NSUserDefaultsController sharedUserDefaultsController] values] valueForKey:@"useScripting"] intValue]];
 	[theCommunicator setTrackTime:[(NSNumber *)[[[NSUserDefaultsController sharedUserDefaultsController] values] valueForKey:@"trackTime"] intValue]];
 	[theCommunicator setNotifyAssignees:[(NSNumber *)[[[NSUserDefaultsController sharedUserDefaultsController] values] valueForKey:@"notifyAssignees"] intValue]];
 	
+	[self addObserver:self forKeyPath:@"basecampURL" options:NSKeyValueObservingOptionNew context:nil];
 	[self addObserver:self forKeyPath:@"userName" options:NSKeyValueObservingOptionNew context:nil];
 	[self addObserver:self forKeyPath:@"passWord" options:NSKeyValueObservingOptionNew context:nil];
 	[self addObserver:self forKeyPath:@"useScripting" options:NSKeyValueObservingOptionNew context:nil];
@@ -33,6 +39,9 @@
 	}
 	else if ([keyPath compare:@"userName"] == NSOrderedSame) {
 		[theCommunicator setPassWord:[[[NSUserDefaultsController sharedUserDefaultsController] values] valueForKey:@"passWord"]];
+	}
+	else if ([keyPath compare:@"basecampURL"] == NSOrderedSame) {
+		[theCommunicator setBasecampURL:[[[NSUserDefaultsController sharedUserDefaultsController] values] valueForKey:@"basecampURL"]];
 	}
 	else if ([keyPath compare:@"useScripting"] == NSOrderedSame) {
 		NSLog(@"setting useScripting");
