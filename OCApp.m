@@ -7,6 +7,7 @@
 //
 
 #import "OCApp.h"
+#import "OCCommunicator.h"
 
 
 @implementation OCApp
@@ -24,12 +25,13 @@
 	[theCommunicator setTrackTime:[(NSNumber *)[[[NSUserDefaultsController sharedUserDefaultsController] values] valueForKey:@"trackTime"] intValue]];
 	[theCommunicator setNotifyAssignees:[(NSNumber *)[[[NSUserDefaultsController sharedUserDefaultsController] values] valueForKey:@"notifyAssignees"] intValue]];
 	
-	[self addObserver:self forKeyPath:@"basecampURL" options:NSKeyValueObservingOptionNew context:nil];
-	[self addObserver:self forKeyPath:@"userName" options:NSKeyValueObservingOptionNew context:nil];
-	[self addObserver:self forKeyPath:@"passWord" options:NSKeyValueObservingOptionNew context:nil];
-	[self addObserver:self forKeyPath:@"useScripting" options:NSKeyValueObservingOptionNew context:nil];
-	[self addObserver:self forKeyPath:@"trackTime" options:NSKeyValueObservingOptionNew context:nil];
-	[self addObserver:self forKeyPath:@"notifyAssignees" options:NSKeyValueObservingOptionNew context:nil];
+	NSUserDefaults *udc = [NSUserDefaults standardUserDefaults];
+	[udc addObserver:self forKeyPath:@"basecampURL" options:NSKeyValueObservingOptionNew context:nil];
+	[udc addObserver:self forKeyPath:@"userName" options:NSKeyValueObservingOptionNew context:nil];
+	[udc addObserver:self forKeyPath:@"passWord" options:NSKeyValueObservingOptionNew context:nil];
+	[udc addObserver:self forKeyPath:@"useScripting" options:NSKeyValueObservingOptionNew context:nil];
+	[udc addObserver:self forKeyPath:@"trackTime" options:NSKeyValueObservingOptionNew context:nil];
+	[udc addObserver:self forKeyPath:@"notifyAssignees" options:NSKeyValueObservingOptionNew context:nil];
 }
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
@@ -54,6 +56,10 @@
 		NSLog(@"setting notifyAssignees");
 		[theCommunicator setNotifyAssignees:[(NSNumber *)[[[NSUserDefaultsController sharedUserDefaultsController] values] valueForKey:@"notifyAssignees"] intValue]];
 	}
+}
+
+-(NSProgressIndicator *)progress {
+	return progress;
 }
 
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification {

@@ -78,15 +78,17 @@
 	
 		
 	NSArray *tasksElements = [ref getItem];
+	NSNumber *taskCount = [NSNumber numberWithInt:[tasksElements count]];
 	
 	OPReference *task;
 	for(task in tasksElements) {
 		// get the basecamp Id for the task if one exists.
-		NSString *basecampId = [[[task customData] getItem] objectForKey:@"Basecamp ID"];
+		id basecampId = [[[task customData] getItem] objectForKey:@"Basecamp ID"];
+		if(basecampId == [OPConstant missingValue]) { basecampId = nil; }
 		if([[task taskType] getItem] == [OPConstant milestoneTask]) {
 			NSMutableDictionary *milestoneDict = [NSMutableDictionary dictionaryWithCapacity:5];
 			[milestoneDict setObject:[[task name] getItem] forKey:@"title"];
-			[milestoneDict setObject:[[task endingDate] getItem] forKey:@"due-at"];
+			[milestoneDict setObject:[[task endingDate] getItem] forKey:@"deadline"];
 			NSString *responsibleParty;
 			if(responsibleParty = [self taskAssignedTo:task]) {
 				[milestoneDict setObject:responsibleParty forKey:@"responsible-party"];
@@ -193,18 +195,28 @@
 	NSDictionary *milestone;
 	for(milestone in milestones) {
 		// use the basecamp id if it has one.
-		NSNumber *taskId = [milestone objectForKey:@"id"] ? [milestone objectForKey:@"id"] : [milestone objectForKey:@"objectId"];
+		NSNumber *basecampId;
+		NSNumber *taskId;
+		basecampId = [milestone objectForKey:@"id"];
+		taskId = [milestone objectForKey:@"objectId"];
+		NSLog(@"%@",taskId);
 		// i use prs, pr because i can't specll prerequiisits.
 		NSArray *prs = [[[[[[[OmniPlanApp documents] byID:fileId] project] tasks] byID:taskId] prerequisites] getItem];
 		OPReference *pr;
 		for(pr in prs) {
 			NSNumber *dependsOn = [[[pr prerequisiteTask] id_] getItem];
+			NSLog(@"%@",dependsOn);\
 			NSArray *onMilestone = [todoLists filteredArrayUsingPredicate:
 				[NSPredicate predicateWithFormat:@"SELF.objectId == %d",[dependsOn intValue]]
 			];
 			NSMutableDictionary *dependMilestone;
 			for(dependMilestone in onMilestone) {
-				[self dependencyForChildren:dependMilestone taskId:taskId];
+				if(basecampId) {
+					[self dependencyForChildren:dependMilestone taskId:basecampId];
+				}
+				else {
+					[self dependencyForChildren:dependMilestone taskId:taskId];
+				}
 			}
 		}
 	}
@@ -212,6 +224,7 @@
 	[retDict setObject:milestones forKey:@"milestones"];
 	[retDict setObject:todoLists forKey:@"todo-lists"];
 	[retDict setObject:projectID forKey:@"project-id"];
+	[retDict setObject:taskCount forKey:@"task-count"];
 	return retDict;
 }
 

@@ -12,6 +12,9 @@
 
 @interface OCApp : NSObject {
 	IBOutlet OCCommunicator *theCommunicator;
+	IBOutlet NSProgressIndicator *progress;
 }
+
+-(NSProgressIndicator *)progress;
 
 @end

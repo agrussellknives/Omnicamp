@@ -1,3 +1,4 @@
+
 //
 //  OCThrottledRequestor.h
 //  OmniCamp
@@ -10,23 +11,32 @@
 
 
 @interface OCThrottledRequestor : NSObject {
-	@private NSTimeInterval requestDelay;
+	@private double requestDelay;
 	@private NSMutableArray *requestQueue;
 	
 	@private NSMutableArray *responseQueue;
 	@private NSTimer *requestTimer;
 	@private BOOL makeRequests;
 	
-	NSMutableDictionary *responseDispatch;
+	@private BOOL suppressFurtherErrors;
+	
+	NSMapTable *responseDispatch;
 	
 }
 
-@property (assign) NSTimeInterval requestDelay;
+@property (assign) double requestDelay;
 @property (assign) BOOL makeRequests;
 
 +(OCThrottledRequestor *)sharedThrottledRequestor;
 -(void)addRequestToQueue:(NSURLRequest *)request;
+-(void)addRequestToQueue:(NSURLRequest *)request withOwner:(id)owner;
+-(void)resumeAfter:(double)delay;
+-(void)startQueue:(NSTimer *)timer;
+-(void)nextInQueue:(NSTimer *)timer;
+-(void)nextInQueue;
+-(void)startQueue;
 -(void)stopQueue;
+-(void)clearAndStopQueue;
 
 @end
 

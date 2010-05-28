@@ -18,6 +18,7 @@
 	id key;
 	
 	for(key in keyList) {
+		if([key isEqualToString:@"objectId"]) { continue; }
 		NSXMLElement *keyElement = [NSXMLElement elementWithName:key];
 		id objToXML = [self objectForKey:key];
 		if([objToXML isKindOfClass:[NSDictionary class]]) {
