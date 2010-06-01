@@ -17,13 +17,18 @@
 #import "OCDependentParser.h"
 #import "OCIndependentParser.h"
 #import "NSInvocation(ForwardedConstruction).h"
-#import "OCUploadPlan.h"
-#import "OCUploadStep.h"
-#import "OCUploadOperation.h"
 #import "RegexKitLite.h"
 #import "ActiveSupportInflector.h"
 #import "OCApp.h"
 
+@interface OCCommunicator (Private) 
+-(void)postTodosForMilestone:(NSArray *)todos;
+-(void)processResponse:(NSHTTPURLResponse *)response forRequest:(NSURLRequest *)req;
+-(void)postTodoItemsForList:(NSMutableDictionary *)todo_list;
+-(void)processData:(NSData *)data forRequest:(NSURLRequest *)req;
+-(void)handleUnexpectedResponse:(NSHTTPURLResponse *)response forRequest:(NSURLRequest *)req;
+-(void)postMilestones:(NSArray *)milestones;
+@end;
 
 @implementation OCCommunicator
 
@@ -145,16 +150,32 @@
 		bcDictionary = [OmniPlanParser decodeOmniPlan:filePath];
 		return NO;
 	}
-	[bcDictionary retain];
 	[self setNumberOfElements:[[bcDictionary objectForKey:@"task-count"] intValue]];
 	// [bcDictionary writeToFile:@"/Users/stephenp/Desktop/bcdict.plist" atomically:YES];
 	[pi setIndeterminate:NO];
 	[pi setDoubleValue:[self percentComplete]];
 													
 	
-	// do milestones first...
+	// post the "general tasks" first
+	
+	NSArray *generalTasks = [[bcDictionary objectForKey:@"todo-lists"] filteredArrayUsingPredicate:
+		[NSPredicate predicateWithFormat:@"objectId == -1"]];
+	[self postTodosForMilestone:generalTasks];
+	
+	
+	// do milestones second...
 		
 	NSArray *milestones = [bcDictionary objectForKey:@"milestones"];
+	[self postMilestones:milestones];
+	
+	
+	[requestor startQueue];
+	
+	// [bcDictionary removeAllObjects];
+	return YES;
+}
+
+-(void)postMilestones:(NSArray *)milestones {
 	NSEnumerator *reverseMilestones = [milestones reverseObjectEnumerator];
 	NSArray *doNotXML = [NSArray arrayWithObject:@"objectId"];
 	NSMutableDictionary *milestone;
@@ -173,10 +194,6 @@
 		[requestor addRequestToQueue:req withOwner:self];
 		[req release]; //the map will retain it, we release our copy.
 	}
-	[requestor startQueue];
-	
-	// [bcDictionary removeAllObjects];
-	return YES;
 }
 
 -(void)postTodosForMilestone:(NSArray *)todos {
@@ -290,6 +307,7 @@
 	}
 	else {
 		NSLog(@"recieved data for request which wasn't honored.");
+		NSLog(@"%@",[[[NSString alloc] initWithData:data encoding:NSASCIIStringEncoding] autorelease]);
 	}
 }
 -(void)processResponse:(NSHTTPURLResponse *)response forRequest:(NSURLRequest *)req {
@@ -321,13 +339,12 @@
 	NSLog(@"queue was emptied");
 	// now we want to push the ids back to Omniplan throught the dependent parser
 	
-	
-	
 	[bcDictionary removeAllObjects];
 	[self setPercentComplete:100];
 	[[theApp progress] setDoubleValue:[self percentComplete]];
 	[[theApp progress] setHidden:YES];
 	numberDone = 0;
+	NSLog(@"%@",bcDictionary);
 }
 
 @end

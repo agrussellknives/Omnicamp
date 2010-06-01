@@ -13,9 +13,6 @@
 		8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
 		A40CCAD311AF8BE900CD8DB4 /* defaults.plist in Resources */ = {isa = PBXBuildFile; fileRef = A40CCAD211AF8BE900CD8DB4 /* defaults.plist */; };
 		A40CCADE11AF91DA00CD8DB4 /* upload-plan.plist in Resources */ = {isa = PBXBuildFile; fileRef = A40CCADD11AF91DA00CD8DB4 /* upload-plan.plist */; };
-		A40CCAE111AF988F00CD8DB4 /* OCUploadPlan.m in Sources */ = {isa = PBXBuildFile; fileRef = A40CCAE011AF988F00CD8DB4 /* OCUploadPlan.m */; };
-		A40CCAE411AF98E900CD8DB4 /* OCUploadStep.m in Sources */ = {isa = PBXBuildFile; fileRef = A40CCAE311AF98E900CD8DB4 /* OCUploadStep.m */; };
-		A40CCAE711AF98FF00CD8DB4 /* OCUploadOperation.m in Sources */ = {isa = PBXBuildFile; fileRef = A40CCAE611AF98FF00CD8DB4 /* OCUploadOperation.m */; };
 		A456093311AF2FAC002583D6 /* NSInvocation(ForwardedConstruction).m in Sources */ = {isa = PBXBuildFile; fileRef = A456093211AF2FAC002583D6 /* NSInvocation(ForwardedConstruction).m */; };
 		A459B93C11AC6DE200822D7C /* ScriptingBridge.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A459B93B11AC6DE200822D7C /* ScriptingBridge.framework */; };
 		A45A1D3C11AEB99D00CE67D0 /* OCIndependentParser.m in Sources */ = {isa = PBXBuildFile; fileRef = A45A1D3B11AEB99D00CE67D0 /* OCIndependentParser.m */; };
@@ -52,12 +49,6 @@
 		8D1107320486CEB800E47090 /* OmniCamp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = OmniCamp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A40CCAD211AF8BE900CD8DB4 /* defaults.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = defaults.plist; sourceTree = "<group>"; };
 		A40CCADD11AF91DA00CD8DB4 /* upload-plan.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "upload-plan.plist"; sourceTree = "<group>"; };
-		A40CCADF11AF988F00CD8DB4 /* OCUploadPlan.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OCUploadPlan.h; sourceTree = "<group>"; };
-		A40CCAE011AF988F00CD8DB4 /* OCUploadPlan.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OCUploadPlan.m; sourceTree = "<group>"; };
-		A40CCAE211AF98E900CD8DB4 /* OCUploadStep.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OCUploadStep.h; sourceTree = "<group>"; };
-		A40CCAE311AF98E900CD8DB4 /* OCUploadStep.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OCUploadStep.m; sourceTree = "<group>"; };
-		A40CCAE511AF98FF00CD8DB4 /* OCUploadOperation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OCUploadOperation.h; sourceTree = "<group>"; };
-		A40CCAE611AF98FF00CD8DB4 /* OCUploadOperation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OCUploadOperation.m; sourceTree = "<group>"; };
 		A456093111AF2FAC002583D6 /* NSInvocation(ForwardedConstruction).h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSInvocation(ForwardedConstruction).h"; sourceTree = "<group>"; };
 		A456093211AF2FAC002583D6 /* NSInvocation(ForwardedConstruction).m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSInvocation(ForwardedConstruction).m"; sourceTree = "<group>"; };
 		A459B93B11AC6DE200822D7C /* ScriptingBridge.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ScriptingBridge.framework; path = /System/Library/Frameworks/ScriptingBridge.framework; sourceTree = "<absolute>"; };
@@ -147,12 +138,6 @@
 				A45A1EBC11AED45400CE67D0 /* NSDictionary+serializeToXML.m */,
 				A45A208B11AF06AE00CE67D0 /* OCThrottledRequestor.h */,
 				A45A208C11AF06AE00CE67D0 /* OCThrottledRequestor.m */,
-				A40CCADF11AF988F00CD8DB4 /* OCUploadPlan.h */,
-				A40CCAE011AF988F00CD8DB4 /* OCUploadPlan.m */,
-				A40CCAE211AF98E900CD8DB4 /* OCUploadStep.h */,
-				A40CCAE311AF98E900CD8DB4 /* OCUploadStep.m */,
-				A40CCAE511AF98FF00CD8DB4 /* OCUploadOperation.h */,
-				A40CCAE611AF98FF00CD8DB4 /* OCUploadOperation.m */,
 			);
 			name = Classes;
 			sourceTree = "<group>";
@@ -324,9 +309,6 @@
 				A45A1EE211AEE5B800CE67D0 /* RegexKitLite.m in Sources */,
 				A45A208D11AF06AE00CE67D0 /* OCThrottledRequestor.m in Sources */,
 				A456093311AF2FAC002583D6 /* NSInvocation(ForwardedConstruction).m in Sources */,
-				A40CCAE111AF988F00CD8DB4 /* OCUploadPlan.m in Sources */,
-				A40CCAE411AF98E900CD8DB4 /* OCUploadStep.m in Sources */,
-				A40CCAE711AF98FF00CD8DB4 /* OCUploadOperation.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
