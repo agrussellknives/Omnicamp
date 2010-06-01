@@ -108,7 +108,7 @@
 			NSArray *childGroupsArray = [childGroups getItem];
 			if([childTasks count] > 0) {
 				NSMutableDictionary *todolistDict = [NSMutableDictionary dictionaryWithCapacity:5];
-				[todolistDict setObject:[[task name] getItem] forKey:@"title"];
+				[todolistDict setObject:[[task name] getItem] forKey:@"name"];
 				[todolistDict setObject:[[task note] getItem] forKey:@"description"];
 				NSString *private;
 				if(private = [[[task customData] getItem] objectForKey:@"Private"]) {
@@ -166,7 +166,7 @@
 	// restrict scope
 	if([freeTasks count] > 0) {
 		NSMutableDictionary *todolistDict = [NSMutableDictionary dictionaryWithCapacity:4];
-		[todolistDict setObject:@"General Tasks" forKey:@"title"];
+		[todolistDict setObject:@"General Tasks" forKey:@"name"];
 		if([communicator trackTime]) {
 			[todolistDict setObject:@"true" forKey:@"tracked"];
 		}

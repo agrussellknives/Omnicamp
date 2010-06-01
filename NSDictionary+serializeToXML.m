@@ -12,13 +12,21 @@
 
 @implementation NSDictionary (serializeToXML)
 
--(NSXMLElement *)serializeToXMLFragmentUsingTagName:(NSString *)elName {
-	NSArray *keyList = [self allKeys];
+
+-(NSXMLElement *)serializeToXMLFragmentUsingTagName:(NSString *)elName excluding:(NSArray *)excluding {
+	NSArray *fullKeyList = [self allKeys];
+	NSArray *keyList;
+	if(excluding) {
+		keyList = [fullKeyList filteredArrayUsingPredicate:[
+			NSPredicate predicateWithFormat:@"NOT (SELF IN %@)",excluding]];
+	}
+	else {
+		keyList = fullKeyList;
+	}
 	NSMutableArray *xmlNodes = [NSMutableArray arrayWithCapacity:[keyList count]];
 	id key;
 	
 	for(key in keyList) {
-		if([key isEqualToString:@"objectId"]) { continue; }
 		NSXMLElement *keyElement = [NSXMLElement elementWithName:key];
 		id objToXML = [self objectForKey:key];
 		if([objToXML isKindOfClass:[NSDictionary class]]) {
@@ -40,14 +48,20 @@
 	return dictElement;
 }
 
+-(NSXMLElement *)serializeToXMLFragmentUsingTagName:(NSString *)elName {
+	return [self serializeToXMLFragmentUsingTagName:elName excluding:nil];
+}
+
 -(NSXMLElement *)serializeToXMLFragment {
 	NSLog(@"Converted a dict to XML without explicit tag name.  Really?");
 	return [self serializeToXMLFragmentUsingTagName:@"item"];
 }
 
-
 -(NSXMLDocument *)serializeToXMLWithRootNamed:(NSString *)rootName {
-	NSXMLElement *rootElement = [self serializeToXMLFragmentUsingTagName:rootName];
+	return [self serializeToXMLWithRootNamed:rootName excluding:nil];
+}
+-(NSXMLDocument *)serializeToXMLWithRootNamed:(NSString *)rootName excluding:(NSArray *)excluding {
+	NSXMLElement *rootElement = [self serializeToXMLFragmentUsingTagName:rootName excluding:excluding];
 	NSXMLDocument *xmlDoc = [NSXMLDocument documentWithRootElement:rootElement];
 	return xmlDoc;
 }

@@ -12,9 +12,11 @@
 @interface NSDictionary (serializeToXML)
 
 -(NSXMLElement *)serializeToXMLFragmentUsingTagName:(NSString *)elName;
+-(NSXMLElement *)serializeToXMLFragmentUsingTagName:(NSString *)elName excluding:(NSArray *)excluding;
 -(NSXMLElement *)serializeToXMLFragment;
 -(NSXMLDocument *)serializeToXMLWithRootNamed:(NSString *)rootName;
 -(NSXMLDocument *)serializeToXML;
+-(NSXMLDocument *)serializeToXMLWithRootNamed:(NSString *)rootName excluding:(NSArray *)excluding;
 
 @end
 

@@ -111,8 +111,8 @@
   else {
     for (ActiveSupportInflectorRule* rule in rules) {
       if ([string isMatchedByRegex:[rule rule]]) {
-        NSLog([rule rule]);
-        NSLog([rule replacement]);
+        //NSLog([rule rule]);
+        //NSLog([rule replacement]);
         return [string stringByReplacingOccurrencesOfRegex:[rule rule] withString:[rule replacement]];
       }
     }
@@ -130,7 +130,6 @@
 
 static ActiveSupportInflector *sharedActiveSupportInflector = NULL;
 + (ActiveSupportInflector *)sharedActiveSupportInflector {
-	NSLog(@"initied saci");
 	@synchronized(self) {
 		if(sharedActiveSupportInflector == NULL) {
 			sharedActiveSupportInflector = [[self alloc] init];

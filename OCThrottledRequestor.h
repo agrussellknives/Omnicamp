@@ -22,8 +22,11 @@
 	
 	NSMapTable *responseDispatch;
 	
+	id delegate;
+	
 }
 
+@property (assign) id delegate;
 @property (assign) double requestDelay;
 @property (assign) BOOL makeRequests;
 
@@ -47,3 +50,11 @@
 -(void)processResponse:(NSHTTPURLResponse *)response forRequest:(NSURLRequest *)req;
 
 @end
+
+// informal protocal for throttled requestor delgate;
+@interface NSObject (OCThrottledRequestDelegate)
+
+-(void)throttledRequestorDidEmptyQueue:(OCThrottledRequestor *)requestor;
+
+@end
+

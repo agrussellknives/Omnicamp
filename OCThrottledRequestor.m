@@ -13,6 +13,7 @@
 
 @synthesize requestDelay;
 @synthesize makeRequests;
+@synthesize delegate;
 
 
 -(OCThrottledRequestor *)init {
@@ -22,8 +23,8 @@
 		requestQueue = [[NSMutableArray alloc] initWithCapacity:2];
 		responseQueue = [[NSMutableArray alloc] initWithCapacity:2];
 		responseDispatch = [[NSMapTable alloc] 
-			initWithKeyOptions:NSPointerFunctionsStrongMemory|NSPointerFunctionsObjectPersonality
-			valueOptions:NSPointerFunctionsStrongMemory|NSPointerFunctionsObjectPersonality
+			initWithKeyOptions:NSPointerFunctionsStrongMemory|NSPointerFunctionsObjectPointerPersonality
+			valueOptions:NSPointerFunctionsStrongMemory|NSPointerFunctionsObjectPointerPersonality
 			capacity:2];
 		requestTimer = [[NSTimer scheduledTimerWithTimeInterval:requestDelay target:self selector:@selector(nextInQueue:)
 			userInfo:nil repeats:YES] retain];
@@ -56,8 +57,6 @@ static OCThrottledRequestor *sharedThrottledRequestor = NULL;
 	[reqDict setObject:request forKey:@"request"];
 	[reqDict setObject:owner forKey:@"owner"];
 	[requestQueue addObject:reqDict];
-	NSLog(@"adding to queue");
-	NSLog(@"%@",requestQueue);
 }
 	
 
@@ -66,7 +65,6 @@ static OCThrottledRequestor *sharedThrottledRequestor = NULL;
 }
 
 - (void)connection:(NSURLConnection *)connection didReceiveResponse:(NSHTTPURLResponse *)response {
-	NSLog(@"got a response");
 	id owner; 
 	if(owner = [[responseDispatch objectForKey:connection] objectAtIndex:0]) {
 		[owner processResponse:response forRequest:[[responseDispatch objectForKey:connection] objectAtIndex:1]];
@@ -82,13 +80,11 @@ static OCThrottledRequestor *sharedThrottledRequestor = NULL;
 }
 
 - (void)connection:(NSURLConnection *)connection didReceiveData:(NSData *)data {
-	NSLog(@"got some data");
 	id owner;
 	if(owner = [[responseDispatch objectForKey:connection] objectAtIndex:0]) {
 		[owner processData:data forRequest:[[responseDispatch objectForKey:connection] objectAtIndex:1]];
 	}
 	else {
-		NSLog(@"handling data ourselves");
 		[responseQueue addObject:data];
 	}
 }
@@ -104,10 +100,14 @@ static OCThrottledRequestor *sharedThrottledRequestor = NULL;
 	[self startQueue:nil];
 }
 -(void)nextInQueue:(NSTimer *)timer {
-	NSLog(@"making request");
 	if([requestQueue count] == 0) {
 		[self stopQueue];
-		NSLog(@"nothing in queue");
+		if(delegate) {
+			[delegate throttledRequestorDidEmptyQueue:self];
+		}
+		else {
+			[self throttledRequestorDidEmptyQueue:self];
+		}
 	}
 	else if ([self makeRequests]) {
 		NSDictionary *requestDictionary = [requestQueue objectAtIndex:0];
@@ -117,13 +117,10 @@ static OCThrottledRequestor *sharedThrottledRequestor = NULL;
 		id owner = [requestDictionary objectForKey:@"owner"];
 		NSURLConnection *con = [NSURLConnection connectionWithRequest:req delegate:self];
 		// use the connection as the key so we can look it up later.
-		NSLog(@"made request");
 		[responseDispatch setObject:[NSArray arrayWithObjects:owner, req, nil] forKey:con];
 		[requestDictionary release]; //okay, we're finished with you now.
 	}
 	// do nothing if we still have something to do, but aren't making request for some reason
-	
-	NSLog(@"reached end");
 }
 
 -(void)stopQueue {
@@ -171,5 +168,9 @@ static OCThrottledRequestor *sharedThrottledRequestor = NULL;
 		requestTimer = [[NSTimer scheduledTimerWithTimeInterval:requestDelay target:self selector:@selector(nextInQueue:)
 			userInfo:nil repeats:YES] retain];
 	}
+}
+
+-(void)throttledRequestorDidEmptyQueue:(OCThrottledRequestor *)requestor {
+	NSLog(@"%@ emptied it's queue",self);
 }
 @end
