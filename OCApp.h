@@ -13,8 +13,10 @@
 @interface OCApp : NSObject {
 	IBOutlet OCCommunicator *theCommunicator;
 	IBOutlet NSProgressIndicator *progress;
+	IBOutlet NSTextField *statusMessage;
 }
 
 -(NSProgressIndicator *)progress;
+-(NSTextField *)statusMessage;
 
 @end

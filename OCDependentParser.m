@@ -8,6 +8,10 @@
 
 #import "OCDependentParser.h"
 
+@interface OCDependentParser (Private)
+-(void)updateOPItem:(OPReference *)opTask withId:(NSNumber *)bcID;
+@end
+
 
 @implementation OCDependentParser 
 
@@ -122,7 +126,7 @@
 				NSMutableArray *todoItems = [todolistDict objectForKey:@"todo-items"];
 				for(childTask in childTasks) {
 					NSMutableDictionary *todoItem = [NSMutableDictionary dictionaryWithCapacity:4];
-					NSString *todo_basecampId = [[[childTask customData] getItem] objectForKey:@"Basecamp ID"];
+					id todo_basecampId = [[[childTask customData] getItem] objectForKey:@"Basecamp ID"];
 					[todoItem setObject:[[childTask name] getItem] forKey:@"content"];
 					[todoItem setObject:[[childTask endingDate] getItem] forKey:@"due-at"];
 					NSString *responsibleParty;
@@ -133,7 +137,7 @@
 						[todoItem setObject:@"true" forKey:@"notify"];
 					}
 					[todoItem setObject:[[childTask id_] getItem] forKey:@"objectId"];
-					if(basecampId) {
+					if(todo_basecampId) {
 						[todoItem setObject:todo_basecampId forKey:@"id"];
 					}
 					[todoItems addObject:todoItem];
@@ -163,6 +167,7 @@
 	/* "free tasks"  these are independent tasks that do not belong to task group (besides the root task group)
 	 in omniplan they are posted into a todo_list called "general tasks" */
 	NSArray *freeTasks = [[[[[OmniPlanApp documents] byID:fileId] childTasks] byTest:[[OPIts taskType] equals:[OPConstant standardTask]]] getItem];
+	id basecampId = [[[[[[OmniPlanApp documents] byID:fileId] project] customData] getItem] objectForKey:@"General Tasks Basecamp ID"];
 	// restrict scope
 	if([freeTasks count] > 0) {
 		NSMutableDictionary *todolistDict = [NSMutableDictionary dictionaryWithCapacity:4];
@@ -174,6 +179,7 @@
 		NSMutableArray *todoItems = [todolistDict objectForKey:@"todo-items"];
 		for(task in freeTasks) {
 			NSMutableDictionary *todoItem = [NSMutableDictionary dictionaryWithCapacity:4];
+			id todo_basecampId = [[[task customData] getItem] objectForKey:@"Basecamp ID"];
 			[todoItem setObject:[[task name] getItem] forKey:@"content"];
 			[todoItem setObject:[[task endingDate] getItem] forKey:@"due-at"];
 			NSString *responsibleParty;
@@ -183,8 +189,14 @@
 			if([communicator notifyAssignees] && responsibleParty) {
 				[todoItem setObject:@"true" forKey:@"notify"];
 			}
+			if(todo_basecampId) {
+				[todoItem setObject:todo_basecampId forKey:@"id"];
+			}				
 			[todoItem setObject:[[task id_] getItem] forKey:@"objectId"];
 			[todoItems addObject:todoItem];
+		}
+		if(basecampId) {
+			[todolistDict setObject:basecampId forKey:@"id"];
 		}
 		[todolistDict setObject:[NSNumber numberWithInt:-1] forKey:@"objectId"];
 		// general tasks go at the beginning
@@ -241,4 +253,47 @@
 	}
 	return bcDict;
 }
+
+-(void)encodeBasecamp:(NSDictionary *)planDict {
+	NSMutableDictionary *bcDict = [NSMutableDictionary dictionaryWithDictionary:planDict];
+	// update todo-lists with basecamp ids if they were returned.
+	NSArray *updated_milestones = [bcDict objectForKey:@"milestones"];
+	NSDictionary *task;
+	OPReference	*tasks = [[[OmniPlanApp documents] byID:fileId] tasks];
+	for(task in updated_milestones) {
+		OPReference *OPtask = [[tasks byID:[task objectForKey:@"objectId"]] customData];
+		[self updateOPItem:OPtask withId:[task objectForKey:@"id"]];
+	}
+	NSArray *updated_todo_lists = [bcDict objectForKey:@"todo-lists"];
+	for(task in updated_todo_lists) {
+		NSArray *updated_todo_items = [task objectForKey:@"todo-items"];
+		if(!updated_todo_items) { continue; }
+		if([[task objectForKey:@"objectId"] intValue] == -1) {
+			OPReference *projectData = [[[[OmniPlanApp documents] byID:fileId] project] customData];
+			NSMutableDictionary *projectDataDict = [projectData getItem];
+			[projectDataDict setObject:[task objectForKey:@"id"] forKey:@"General Tasks Basecamp ID"];
+			[projectData setItem:projectDataDict];
+		} else {
+			OPReference *OPtask = [[tasks byID:[task objectForKey:@"objectId"]] customData];
+			[self updateOPItem:OPtask withId:[task objectForKey:@"id"]];
+		}
+		NSDictionary *tdi;
+		for(tdi in updated_todo_items) {
+			OPReference *OPtdi = [[tasks byID:[tdi objectForKey:@"objectId"]] customData];
+			[self updateOPItem:OPtdi withId:[tdi objectForKey:@"id"]];
+		}
+	}
+	// save the file
+	[[[OmniPlanApp documents] byID:fileId] save];
+}
+
+-(void)updateOPItem:(OPReference *)opTask withId:(NSNumber *)bcID {
+	if(!bcID) {
+		[NSException raise:@"OCBasecampNullID" format:@"Basecamp Null ID : OP Object Id %@",[[opTask id_] getItem]];
+	}
+	else {
+		[opTask setItem:[NSDictionary dictionaryWithObject:bcID forKey:@"Basecamp ID"]];
+	}
+}
+																	
 @end

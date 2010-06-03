@@ -28,6 +28,7 @@
 -(void)processData:(NSData *)data forRequest:(NSURLRequest *)req;
 -(void)handleUnexpectedResponse:(NSHTTPURLResponse *)response forRequest:(NSURLRequest *)req;
 -(void)postMilestones:(NSArray *)milestones;
+-(void)cleanUp;
 @end;
 
 @implementation OCCommunicator
@@ -44,6 +45,7 @@
 @synthesize percentComplete;
 @synthesize inDeterminate;
 @synthesize inAnimate;
+@synthesize statusMessage;
 
 -(id)init {
 	if(self = [super init]) {
@@ -54,6 +56,7 @@
 			capacity:2];
 		requestor = [OCThrottledRequestor sharedThrottledRequestor];
 		[requestor setDelegate:self];
+		[self setStatusMessage:@"Drop Omniplan file here to Sync."];
 		inProcess = 0;
 		numberOfElements = 0;
 		percentComplete = 0;
@@ -137,29 +140,32 @@
 	[pi setUsesThreadedAnimation:YES];
 	[pi setIndeterminate:YES];
 	[pi startAnimation:self];
+	[self setStatusMessage:@"Getting information from Omniplan"];
+	[[theApp statusMessage] display]; // because kvo notifications don't get posted until it returns to the run loop.
 	
 		
 	if(useScripting) {
-		bcDictionary = [OmniPlanParser decodeOmniPlan:filePath];
+		bcDictionary = [[OmniPlanParser decodeOmniPlan:filePath] retain];
 	}
 	else {
 		NSRunAlertPanel(@"Independent Parsing not implemented",
 		@"Independent analysis and posting of Omniplan Project files is not fully implemented."
 		"The routine will run and output info the console, but no data will be posted.  You may"
 		"experience errors, including crashes!", nil, nil, nil);
-		bcDictionary = [OmniPlanParser decodeOmniPlan:filePath];
+		bcDictionary = [[OmniPlanParser decodeOmniPlan:filePath] retain];
 		return NO;
 	}
+	
 	[self setNumberOfElements:[[bcDictionary objectForKey:@"task-count"] intValue]];
 	// [bcDictionary writeToFile:@"/Users/stephenp/Desktop/bcdict.plist" atomically:YES];
 	[pi setIndeterminate:NO];
 	[pi setDoubleValue:[self percentComplete]];
 													
-	
 	// post the "general tasks" first
+	[self setStatusMessage:@"Posting information to Basecamp"];
 	
 	NSArray *generalTasks = [[bcDictionary objectForKey:@"todo-lists"] filteredArrayUsingPredicate:
-		[NSPredicate predicateWithFormat:@"objectId == -1"]];
+		[NSPredicate predicateWithFormat:@"objectId == -1 && id != NULL"]];
 	[self postTodosForMilestone:generalTasks];
 	
 	
@@ -171,8 +177,7 @@
 	
 	[requestor startQueue];
 	
-	// [bcDictionary removeAllObjects];
-	return YES;
+	return YES; 
 }
 
 -(void)postMilestones:(NSArray *)milestones {
@@ -189,6 +194,7 @@
 		[req setHTTPBody:[msDoc XMLData]];
 		[milestone setObject:[NSNumber numberWithInt:201] forKey:@"expect"];
 		[milestone setObject:@"milestone" forKey:@"type"];
+		[milestone setObject:@"post" forKey:@"operation"];
 		//NSLog(@"%@",requestHistory);
 		[requestHistory setObject:milestone forKey:req];
 		[requestor addRequestToQueue:req withOwner:self];
@@ -207,8 +213,11 @@
 		[req setHTTPBody:[todoDoc XMLData]];
 		[todo setObject:[NSNumber numberWithInt:201] forKey:@"expect"];
 		[todo setObject:@"todo-list" forKey:@"type"];
+		[todo setObject:@"post" forKey:@"operation"];
+		// as a special case.		
 		[requestHistory setObject:todo forKey:req];
 		[requestor addRequestToQueue:req withOwner:self];
+		[req release];
 	}
 }
 -(void)postTodoItemsForList:(NSMutableDictionary *)todo_list {
@@ -222,8 +231,10 @@
 		[req setHTTPBody:[todoItemDoc XMLData]];
 		[todo_item setObject:[NSNumber numberWithInt:201] forKey:@"expect"];
 		[todo_item setObject:@"todo-item" forKey:@"type"];
+		[todo_item setObject:@"post" forKey:@"operation"];
 		[requestHistory setObject:todo_item forKey:req];
 		[requestor addRequestToQueue:req withOwner:self];
+		[req release];
 	}
 }
 
@@ -266,12 +277,13 @@
 					[response statusCode],[response allHeaderFields]],
 			nil, nil, nil);
 	}
+	[self cleanUp];
 }
 			
 
 
 -(void)processData:(NSData *)data forRequest:(NSURLRequest *)req {
-	//NSLog(@"receiving data for %@",req);
+	// NSLog(@"receiving data for %@",req);
 	NSMutableDictionary *obj = [requestHistory objectForKey:req];
 	NSError *error = nil;
 	if([[obj objectForKey:@"expect"] isEqualToString:@"ok"]) {
@@ -285,7 +297,8 @@
 			int bcIdInt, objectId;
 			[[NSScanner scannerWithString:[bcId stringValue]] scanInt:&bcIdInt];
 			objectId = [[obj objectForKey:@"objectId"] intValue];
-			
+			// set the basecamp id of our reference object
+			[obj setObject:[NSNumber numberWithInt:bcIdInt] forKey:@"id"];
 			NSArray *dpTodos = [[bcDictionary objectForKey:@"todo-lists"] filteredArrayUsingPredicate:
 				[NSPredicate predicateWithFormat:@"%K == %d OR %K == %d",@"milestone-id",bcIdInt,@"milestone-id",objectId]];
 			//NSLog(@"%@",dpTodos);
@@ -312,7 +325,7 @@
 }
 -(void)processResponse:(NSHTTPURLResponse *)response forRequest:(NSURLRequest *)req {
 	// retrieve our object
-	//NSLog(@"receiving response for %@",req);
+	// NSLog(@"receiving response for %@",req);
 	//NSLog(@"request sent was %@",[[[NSString alloc] initWithData:[req HTTPBody] encoding:NSASCIIStringEncoding] autorelease]);
 	NSMutableDictionary *obj = [requestHistory objectForKey:req];
 	if(([response statusCode] == [[obj objectForKey:@"expect"] intValue])) {
@@ -335,16 +348,25 @@
 	}
 }
 
--(void)throttledRequestorDidEmptyQueue:(OCThrottledRequestor *)requestor {
-	NSLog(@"queue was emptied");
-	// now we want to push the ids back to Omniplan throught the dependent parser
-	
+-(void)cleanUp {
+	NSLog(@"cleaning up self");
+	[self setStatusMessage:@"Drop Omniplan File here to Sync"];
 	[bcDictionary removeAllObjects];
+	[bcDictionary release];
 	[self setPercentComplete:100];
 	[[theApp progress] setDoubleValue:[self percentComplete]];
 	[[theApp progress] setHidden:YES];
+	[self setPercentComplete:0.0];
 	numberDone = 0;
-	NSLog(@"%@",bcDictionary);
+}
+
+-(void)throttledRequestorDidEmptyQueue:(OCThrottledRequestor *)requestor {
+	NSLog(@"queue was emptied");
+	// now we want to push the ids back to Omniplan throught the dependent parser
+	[self setStatusMessage:@"Pusing info into Omniplan"];
+	[[theApp statusMessage] display];
+	[OmniPlanParser encodeBasecamp:bcDictionary];
+	[self cleanUp];
 }
 
 @end

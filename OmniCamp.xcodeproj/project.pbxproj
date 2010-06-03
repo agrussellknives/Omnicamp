@@ -34,6 +34,7 @@
 		A4C50D2111ADBF56008797CA /* OPReferenceGlue.m in Sources */ = {isa = PBXBuildFile; fileRef = A4C50D1B11ADBF56008797CA /* OPReferenceGlue.m */; };
 		A4C50D2211ADBF56008797CA /* OPReferenceRendererGlue.m in Sources */ = {isa = PBXBuildFile; fileRef = A4C50D1D11ADBF56008797CA /* OPReferenceRendererGlue.m */; };
 		A4C50D2411ADBF66008797CA /* Appscript.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A4C50D2311ADBF66008797CA /* Appscript.framework */; };
+		EA58D01711B832A600C2248F /* NSDictionary+dictFromXML.m in Sources */ = {isa = PBXBuildFile; fileRef = EA58D01611B832A600C2248F /* NSDictionary+dictFromXML.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -91,6 +92,8 @@
 		A4C50D1C11ADBF56008797CA /* OPReferenceRendererGlue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OPReferenceRendererGlue.h; sourceTree = "<group>"; };
 		A4C50D1D11ADBF56008797CA /* OPReferenceRendererGlue.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OPReferenceRendererGlue.m; sourceTree = "<group>"; };
 		A4C50D2311ADBF66008797CA /* Appscript.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Appscript.framework; path = /Library/Frameworks/Appscript.framework; sourceTree = "<absolute>"; };
+		EA58D01511B832A600C2248F /* NSDictionary+dictFromXML.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSDictionary+dictFromXML.h"; sourceTree = "<group>"; };
+		EA58D01611B832A600C2248F /* NSDictionary+dictFromXML.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSDictionary+dictFromXML.m"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -138,6 +141,8 @@
 				A45A1EBC11AED45400CE67D0 /* NSDictionary+serializeToXML.m */,
 				A45A208B11AF06AE00CE67D0 /* OCThrottledRequestor.h */,
 				A45A208C11AF06AE00CE67D0 /* OCThrottledRequestor.m */,
+				EA58D01511B832A600C2248F /* NSDictionary+dictFromXML.h */,
+				EA58D01611B832A600C2248F /* NSDictionary+dictFromXML.m */,
 			);
 			name = Classes;
 			sourceTree = "<group>";
@@ -309,6 +314,7 @@
 				A45A1EE211AEE5B800CE67D0 /* RegexKitLite.m in Sources */,
 				A45A208D11AF06AE00CE67D0 /* OCThrottledRequestor.m in Sources */,
 				A456093311AF2FAC002583D6 /* NSInvocation(ForwardedConstruction).m in Sources */,
+				EA58D01711B832A600C2248F /* NSDictionary+dictFromXML.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -56,10 +56,15 @@
 		NSLog(@"setting notifyAssignees");
 		[theCommunicator setNotifyAssignees:[(NSNumber *)[[[NSUserDefaultsController sharedUserDefaultsController] values] valueForKey:@"notifyAssignees"] intValue]];
 	}
+	[theCommunicator updateRequestTemplate];
 }
 
 -(NSProgressIndicator *)progress {
 	return progress;
+}
+
+-(NSTextField *)statusMessage {
+	return statusMessage;
 }
 
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification {

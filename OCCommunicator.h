@@ -20,6 +20,7 @@
 	@private NSString* userName;
 	@private NSString* passWord;
 	@private NSString* basecampURL;
+	@private NSString* statusMessage;
 	@private int useScripting;
 	@private int trackTime;
 	@private int notifyAssignees;
@@ -53,6 +54,7 @@
 @property int inDeterminate;
 @property int inAnimate;
 @property int numberOfElements;
+@property (copy) NSString *statusMessage;
 
 -(BOOL)postToBasecamp:(NSString *)filePath error:(NSError **)error;
 -(void)setFilePath:(NSString *)thePath;

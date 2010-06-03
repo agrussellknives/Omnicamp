@@ -50,6 +50,12 @@
 	if([theCommunicator userName] && [theCommunicator passWord]) {
 		return YES;
 	}
+	
+	if([theCommunicator inProcess]) {
+		//reject if we'ere currently uploading;
+		return NO;
+	}
+	
 	NSRunAlertPanel(@"Basecamp Error",@"You have to set the Basecamp Username and Password before using OmniCamp",
 		nil,nil,nil);
 	return NO;

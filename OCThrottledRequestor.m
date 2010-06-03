@@ -28,6 +28,8 @@
 			capacity:2];
 		requestTimer = [[NSTimer scheduledTimerWithTimeInterval:requestDelay target:self selector:@selector(nextInQueue:)
 			userInfo:nil repeats:YES] retain];
+		[requestTimer invalidate]; // we immediately invalidate our timer so that we don't make any requests until we are asked to start.
+		// we do this because it needs to be a valid NSTimer object at all times to support arbitraty stop / start.
 	}
 	return self;
 }

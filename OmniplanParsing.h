@@ -12,6 +12,7 @@
 @protocol OmniplanParsing <NSObject>
 
 -(NSMutableDictionary *)decodeOmniPlan:(id)thePlan;
+-(void)encodeBasecamp:(NSDictionary *)planDict;
 
 @property (copy) NSString *filePath;
 @property (nonatomic,assign) OCCommunicator *communicator;

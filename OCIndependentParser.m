@@ -260,4 +260,8 @@
 	return bcDict;
 }
 
+-(void)encodeBasecamp:(NSDictionary *)planDict {
+	return;
+}
+
 @end
