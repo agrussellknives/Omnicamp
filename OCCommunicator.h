@@ -40,6 +40,10 @@
 	
 	NSMutableDictionary *bcDictionary;
 	NSXMLDocument *bcXML;
+	
+	NSArray *uploadPlan;
+	@private int uploadStep;
+	@private NSDictionary *currentStep;
 }
 
 @property (copy) NSString *userName;

@@ -19,6 +19,7 @@
 #import "NSInvocation(ForwardedConstruction).h"
 #import "RegexKitLite.h"
 #import "ActiveSupportInflector.h"
+#import "NSString+stringWithFormatArray.h"
 #import "OCApp.h"
 
 @interface OCCommunicator (Private) 
@@ -63,6 +64,8 @@
 		inDeterminate = 0;
 		inAnimate = 0;
 		numberDone = 0;
+		uploadStep = 0;
+		currentStep = nil;
 	}
 	return self;
 }
@@ -157,29 +160,69 @@
 	}
 	
 	[self setNumberOfElements:[[bcDictionary objectForKey:@"task-count"] intValue]];
-	// [bcDictionary writeToFile:@"/Users/stephenp/Desktop/bcdict.plist" atomically:YES];
+	
 	[pi setIndeterminate:NO];
 	[pi setDoubleValue:[self percentComplete]];
-													
-	// post the "general tasks" first
+
 	[self setStatusMessage:@"Posting information to Basecamp"];
 	
 	NSArray *generalTasks = [[bcDictionary objectForKey:@"todo-lists"] filteredArrayUsingPredicate:
-		[NSPredicate predicateWithFormat:@"objectId == -1 && id != NULL"]];
-	[self postTodosForMilestone:generalTasks];
+		[NSPredicate predicateWithFormat:@"objectId == -1 && id == NULL"]];
+	if([generalTasks count] > 0) {
+		[self postTodosForMilestone:generalTasks];
+	}
 	
-	
-	// do milestones second...
+	NSArray *uploadPlan = [[NSArray alloc] initWithContentsOfFile:
+		[[NSBundle mainBundle] pathForResource:@"upload-plan" ofType:@"plist"]]
 		
-	NSArray *milestones = [bcDictionary objectForKey:@"milestones"];
-	[self postMilestones:milestones];
-	
+	[self nextStep];
 	
 	[requestor startQueue];
 	
 	return YES; 
 }
 
+-(void)nextStep {
+	if(currentStep) {
+		[currentStep release];
+	}
+	currentStep = [[uploadPlan objectAtIndex:uploadStep] retain];
+	
+	uploadStep++;
+	[self postType:[currentStep objectForKey:@"type"] withData:[bcDictionary objectForKey:[currentStep objectForKey:@"type"]]];	
+}
+
+-(void)postType:(NSString *)type withData:(NSArray *)data {
+	NSEnumerator *reverseObjects = [data reverseObjectEnumerator];
+	NSArray *doNotXML = [NSArray arrayWithArray:[currentStep objectForKey:@"exclude"]];
+	NSMutableDictionary *item;
+	for(item in data) {
+		NSMutableURLRequest *req = [requestTemplate mutableCopy];
+		[req setURL:[NSURL URLWithString:
+			[NSString stringWithFormat:
+				[currentStep valueForKeyPath:@"new.url.format"]
+				objectValues: [currentStep valueForKeyPath:@"new.url.vars"]
+			]]];
+		NSXMLDocument *itemDoc;
+		NSXMLElement *itemEl = [item serializeToXMLFragmentUsingTagName:[currentStep valueForKeyPath:@"new.tag"] excluding:doNotXML];
+		if([currentStep objectForKey:@"enclosingTag"]) {
+			NSXMLElement *encTag = [NSXMLElement elementWithName:[currentStep valueForKeyPath:@"new.enclosingTag"]];
+			[encTag setChildren:[NSArray arrayWithObject:itemEl]];
+			itemDoc = [NSXMLDocument documentWithRootElement:encTag];
+		} else {
+			itemDoc = [NSXMLDocument documentWithRootElement:itemEl];
+		}
+		[req setHTTPBody:[itemDoc XMLData]];
+		[item setObject:[NSNumber numberWithInt:201] forKey:@"expect"];
+		[item setObject:[currentStep objectForKey:@"type"] forKey:@"type"];
+		[item setObject:@"post" forKey:@"operation"];
+		[requestHistory setObject:item forKey:req];
+		[requestor addRequestToQueue:req withOwner:self];
+		[req release]; // retained by the map;
+	}
+}
+		
+		
 -(void)postMilestones:(NSArray *)milestones {
 	NSEnumerator *reverseMilestones = [milestones reverseObjectEnumerator];
 	NSArray *doNotXML = [NSArray arrayWithObject:@"objectId"];
