@@ -10,5 +10,5 @@
 
 
 @interface NSString (stringWithFormatAcceptingArray)
-+(NSString *)stringWithFormat:(NSString *)format objectValues:(NSArray *)values
++(NSString *)stringWithFormat:(NSString *)format objectValues:(NSArray *)values;
 @end

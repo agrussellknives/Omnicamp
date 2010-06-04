@@ -23,13 +23,15 @@
 #import "OCApp.h"
 
 @interface OCCommunicator (Private) 
--(void)postTodosForMilestone:(NSArray *)todos;
 -(void)processResponse:(NSHTTPURLResponse *)response forRequest:(NSURLRequest *)req;
--(void)postTodoItemsForList:(NSMutableDictionary *)todo_list;
 -(void)processData:(NSData *)data forRequest:(NSURLRequest *)req;
 -(void)handleUnexpectedResponse:(NSHTTPURLResponse *)response forRequest:(NSURLRequest *)req;
--(void)postMilestones:(NSArray *)milestones;
+-(void)postType:(NSString *)type withData:(NSArray *)data;
+-(void)postType:(NSString *)type withData:(NSArray *)data userInfo:(NSDictionary *)info;
+-(void)nextStepFromKey:(NSString *)key;
 -(void)cleanUp;
+
+-(void)urlOp:(NSString *)op withType:(NSString *)type withData:(NSArray *)data userInfo:(NSDictionary *)info;  
 @end;
 
 @implementation OCCommunicator
@@ -47,6 +49,7 @@
 @synthesize inDeterminate;
 @synthesize inAnimate;
 @synthesize statusMessage;
+@synthesize bcDictionary;
 
 -(id)init {
 	if(self = [super init]) {
@@ -148,7 +151,8 @@
 	
 		
 	if(useScripting) {
-		bcDictionary = [[OmniPlanParser decodeOmniPlan:filePath] retain];
+		bcDictionary = [OmniPlanParser decodeOmniPlan:filePath];
+		[bcDictionary retain];
 	}
 	else {
 		NSRunAlertPanel(@"Independent Parsing not implemented",
@@ -166,123 +170,124 @@
 
 	[self setStatusMessage:@"Posting information to Basecamp"];
 	
+	uploadPlan = [[NSDictionary alloc] initWithContentsOfFile:
+		[[NSBundle mainBundle] pathForResource:@"upload-plan" ofType:@"plist"]];
+	
 	NSArray *generalTasks = [[bcDictionary objectForKey:@"todo-lists"] filteredArrayUsingPredicate:
-		[NSPredicate predicateWithFormat:@"objectId == -1 && id == NULL"]];
+		[NSPredicate predicateWithFormat:@"objectId == -1"]];
 	if([generalTasks count] > 0) {
-		[self postTodosForMilestone:generalTasks];
+		[self postType:@"todo-lists" withData:generalTasks];
 	}
 	
-	NSArray *uploadPlan = [[NSArray alloc] initWithContentsOfFile:
-		[[NSBundle mainBundle] pathForResource:@"upload-plan" ofType:@"plist"]]
-		
-	[self nextStep];
+	[self nextStepFromKey:nil];
 	
 	[requestor startQueue];
 	
 	return YES; 
 }
 
--(void)nextStep {
+-(void)nextStepFromKey:(NSString *)key {
 	if(currentStep) {
 		[currentStep release];
 	}
-	currentStep = [[uploadPlan objectAtIndex:uploadStep] retain];
+	NSArray *stepArray = [uploadPlan objectForKey:@"step-order"];
+	NSString *stepKey;
+	if(key) {
+		stepKey = [stepArray objectAtIndex:([stepArray indexOfObject:key]+1)];
+	} else {
+		stepKey = [stepArray objectAtIndex:0];
+	}
+	
+	currentStep = [uploadPlan objectForKey:stepKey];
 	
 	uploadStep++;
-	[self postType:[currentStep objectForKey:@"type"] withData:[bcDictionary objectForKey:[currentStep objectForKey:@"type"]]];	
+	[self postType:stepKey withData:[bcDictionary objectForKey:stepKey]];	
 }
 
+-(NSArray *)parseVars:(NSArray *)vars considering:(id)items {
+	NSMutableArray *values = [NSMutableArray arrayWithCapacity:[vars count]];
+	NSMutableDictionary *allItemValues = [NSMutableDictionary dictionaryWithCapacity:1];
+	NSString *kvp;
+		
+	if([items isKindOfClass:[NSArray class]]) {
+		NSDictionary *eachDict;
+		for(eachDict in items) {
+			[allItemValues addEntriesFromDictionary:eachDict];
+		}
+	} else if ([items isKindOfClass:[NSDictionary class]]) {
+		allItemValues = [NSMutableDictionary dictionaryWithDictionary:items];
+	}
+		
+	for(kvp in vars) {
+		NSRange spec;
+		spec = [kvp rangeOfString:@"self"];
+		if(spec.location == 0) {
+			[values addObject:[self valueForKeyPath:[kvp substringFromIndex:spec.length+1]]];
+		}
+		else {
+			[values addObject:[allItemValues valueForKeyPath:kvp]];
+		}
+	}
+	return values;
+}
+
+
+
+
 -(void)postType:(NSString *)type withData:(NSArray *)data {
-	NSEnumerator *reverseObjects = [data reverseObjectEnumerator];
-	NSArray *doNotXML = [NSArray arrayWithArray:[currentStep objectForKey:@"exclude"]];
+	[self postType:type withData:data userInfo:nil];
+}
+-(void)postType:(NSString *)type withData:(NSArray *)data userInfo:(NSDictionary *)info {
+	[self urlOp:@"new" withType:type withData:data userInfo:info];
+	[self updateType:type withData:data userInfo:info];
+}
+-(void)updateType:(NSString *)type withData:(NSArray *)data userInfo:(NSDictionary *)info {
+	[self urlOp:@"update" withType:type withData:data userInfo:info];
+}
+
+-(void)urlOp:(NSString *)op withType:(NSString *)type withData:(NSArray *)data userInfo:(NSDictionary *)info {
+	NSLog(@"%@ %@",op,type);
+	// predicate array with the qualifiying test.
+	currentStep = [uploadPlan objectForKey:type];
+	NSMutableDictionary *settingsDict = [NSMutableDictionary dictionaryWithDictionary:
+		[uploadPlan valueForKeyPath:[@"default." stringByAppendingString:op]]];
+	[settingsDict addEntriesFromDictionary:[currentStep valueForKeyPath:op]];
+	
+	NSPredicate *qualifiyingTest = [NSPredicate predicateWithFormat:[settingsDict valueForKeyPath:@"qualifyingTest"]];
+	data = [data filteredArrayUsingPredicate:qualifiyingTest];
+	NSEnumerator *reversedObjects = [data reverseObjectEnumerator];
+	NSArray *doNotXML = [NSArray arrayWithArray:[settingsDict valueForKeyPath:@"exclude"]];
+	id userInfo;
 	NSMutableDictionary *item;
-	for(item in data) {
+	for(item in reversedObjects) {
+		userInfo = info ? [NSArray arrayWithObjects:item,info,nil] : item;
 		NSMutableURLRequest *req = [requestTemplate mutableCopy];
 		[req setURL:[NSURL URLWithString:
 			[NSString stringWithFormat:
-				[currentStep valueForKeyPath:@"new.url.format"]
-				objectValues: [currentStep valueForKeyPath:@"new.url.vars"]
+				[settingsDict valueForKeyPath:@"url.format"]
+				objectValues: [self parseVars:[settingsDict valueForKeyPath:@"url.vars"] considering:userInfo]
 			]]];
 		NSXMLDocument *itemDoc;
-		NSXMLElement *itemEl = [item serializeToXMLFragmentUsingTagName:[currentStep valueForKeyPath:@"new.tag"] excluding:doNotXML];
-		if([currentStep objectForKey:@"enclosingTag"]) {
-			NSXMLElement *encTag = [NSXMLElement elementWithName:[currentStep valueForKeyPath:@"new.enclosingTag"]];
+		NSXMLElement *itemEl = [item serializeToXMLFragmentUsingTagName:[settingsDict valueForKeyPath:@"tag"] excluding:doNotXML];
+		if([settingsDict valueForKeyPath:@"enclosingTag"]) {
+			NSXMLElement *encTag = [NSXMLElement elementWithName:[settingsDict valueForKeyPath:@"enclosingTag"]];
 			[encTag setChildren:[NSArray arrayWithObject:itemEl]];
 			itemDoc = [NSXMLDocument documentWithRootElement:encTag];
 		} else {
 			itemDoc = [NSXMLDocument documentWithRootElement:itemEl];
 		}
 		[req setHTTPBody:[itemDoc XMLData]];
-		[item setObject:[NSNumber numberWithInt:201] forKey:@"expect"];
-		[item setObject:[currentStep objectForKey:@"type"] forKey:@"type"];
-		[item setObject:@"post" forKey:@"operation"];
+		[item setObject:[settingsDict valueForKeyPath:@"expect"] forKey:@"expect"];
+		[item setObject:[[ActiveSupportInflector sharedActiveSupportInflector] singularize:type] forKey:@"type"];
+		[item setObject:[settingsDict valueForKeyPath:@"operation"] forKey:@"operation"];
 		[requestHistory setObject:item forKey:req];
 		[requestor addRequestToQueue:req withOwner:self];
 		[req release]; // retained by the map;
-	}
+	}	
 }
 		
-		
--(void)postMilestones:(NSArray *)milestones {
-	NSEnumerator *reverseMilestones = [milestones reverseObjectEnumerator];
-	NSArray *doNotXML = [NSArray arrayWithObject:@"objectId"];
-	NSMutableDictionary *milestone;
-	for(milestone in reverseMilestones) {
-		NSMutableURLRequest *req = [requestTemplate mutableCopy];
-		[req setURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@/projects/%@/milestones/create",basecampURL,[bcDictionary objectForKey:@"project-id"]]]];
-		NSXMLElement *request = [NSXMLElement elementWithName:@"request"];
-		NSXMLDocument *msDoc = [NSXMLDocument documentWithRootElement:request];
-		NSXMLElement *msEl = [milestone serializeToXMLFragmentUsingTagName:@"milestone" excluding:doNotXML];
-		[request setChildren:[NSArray arrayWithObject:msEl]];
-		[req setHTTPBody:[msDoc XMLData]];
-		[milestone setObject:[NSNumber numberWithInt:201] forKey:@"expect"];
-		[milestone setObject:@"milestone" forKey:@"type"];
-		[milestone setObject:@"post" forKey:@"operation"];
-		//NSLog(@"%@",requestHistory);
-		[requestHistory setObject:milestone forKey:req];
-		[requestor addRequestToQueue:req withOwner:self];
-		[req release]; //the map will retain it, we release our copy.
-	}
-}
-
--(void)postTodosForMilestone:(NSArray *)todos {
-	NSArray *doNotXML = [NSArray arrayWithObjects:@"objectId",@"todo-items",nil];
-	NSMutableDictionary *todo;
-	NSEnumerator *reverse = [todos reverseObjectEnumerator];
-	for(todo in reverse) {
-		NSMutableURLRequest *req = [requestTemplate mutableCopy];
-		[req setURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@/projects/%@/todo_lists.xml",basecampURL,[bcDictionary objectForKey:@"project-id"]]]];
-		NSXMLDocument *todoDoc = [todo serializeToXMLWithRootNamed:@"todo-list" excluding:doNotXML];
-		[req setHTTPBody:[todoDoc XMLData]];
-		[todo setObject:[NSNumber numberWithInt:201] forKey:@"expect"];
-		[todo setObject:@"todo-list" forKey:@"type"];
-		[todo setObject:@"post" forKey:@"operation"];
-		// as a special case.		
-		[requestHistory setObject:todo forKey:req];
-		[requestor addRequestToQueue:req withOwner:self];
-		[req release];
-	}
-}
--(void)postTodoItemsForList:(NSMutableDictionary *)todo_list {
-	NSArray *doNotXML = [NSArray arrayWithObject:@"objectId"];
-	NSMutableDictionary *todo_item;
-	NSEnumerator *todolistItemsReverse = [[todo_list objectForKey:@"todo-items"] reverseObjectEnumerator];
-	for(todo_item in todolistItemsReverse) {
-		NSMutableURLRequest *req = [requestTemplate mutableCopy];
-		[req setURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@/todo_lists/%@/todo_items.xml",basecampURL,[todo_list objectForKey:@"id"]]]];
-		NSXMLDocument *todoItemDoc = [todo_item serializeToXMLWithRootNamed:@"todo-item" excluding:doNotXML];
-		[req setHTTPBody:[todoItemDoc XMLData]];
-		[todo_item setObject:[NSNumber numberWithInt:201] forKey:@"expect"];
-		[todo_item setObject:@"todo-item" forKey:@"type"];
-		[todo_item setObject:@"post" forKey:@"operation"];
-		[requestHistory setObject:todo_item forKey:req];
-		[requestor addRequestToQueue:req withOwner:self];
-		[req release];
-	}
-}
-
 -(void)handleUnexpectedResponse:(NSHTTPURLResponse *)response forRequest:(NSURLRequest *)req {
-	//NSLog(@"unexpected response code");
+	NSLog(@"unexpected response code");
 	switch([response statusCode]) {
 		case 404:
 			[requestor clearAndStopQueue];
@@ -313,12 +318,9 @@
 			[NSException raise:@"Malformed Request" format:@"%@ not a good request",req];
 		default:
 			[requestor clearAndStopQueue];
-			NSRunAlertPanel(@"Basecamp Error", 
-				[NSString stringWithFormat:@"Basecamp returned a status code indicating an error, but we're not 100% sure what happened."
-					"The error status was: %d\n"
-					"Reponse headers were: %@",
-					[response statusCode],[response allHeaderFields]],
-			nil, nil, nil);
+			NSLog(@"Offending Request: %@",[[[NSString alloc] initWithData:[req HTTPBody] encoding:NSASCIIStringEncoding] autorelease]);
+			NSRunAlertPanel(@"Basecamp Error", @"Basecamp returned a status code indicating an error, but we're not 100% sure what happened.",
+				nil,nil,nil);
 	}
 	[self cleanUp];
 }
@@ -337,23 +339,21 @@
 			NSXMLNode *bcId = [[msRDoc nodesForXPath:@"//id" error:&error] objectAtIndex:0];
 			NSMutableDictionary *todo_list;
 			// create int values for the ids.
-			int bcIdInt, objectId;
-			[[NSScanner scannerWithString:[bcId stringValue]] scanInt:&bcIdInt];
-			objectId = [[obj objectForKey:@"objectId"] intValue];
+			int objectId = [[obj objectForKey:@"objectId"] intValue];
+			NSString *bcIdInt = [bcId stringValue];
 			// set the basecamp id of our reference object
-			[obj setObject:[NSNumber numberWithInt:bcIdInt] forKey:@"id"];
+			[obj setObject:bcIdInt forKey:@"id"];
 			NSArray *dpTodos = [[bcDictionary objectForKey:@"todo-lists"] filteredArrayUsingPredicate:
-				[NSPredicate predicateWithFormat:@"%K == %d OR %K == %d",@"milestone-id",bcIdInt,@"milestone-id",objectId]];
-			//NSLog(@"%@",dpTodos);
+				[NSPredicate predicateWithFormat:@"%K == %@ OR %K == %d",@"milestone-id",bcIdInt,@"milestone-id",objectId]];
 			for(todo_list in dpTodos) {
-				[todo_list setObject:[bcId stringValue] forKey:@"milestone-id"];
+				[todo_list setObject:bcIdInt forKey:@"milestone-id"];
 			}
-			[self postTodosForMilestone:dpTodos];
+			[self postType:@"todo-lists" withData:dpTodos];
 			[self incrementDone];
 		}
 		else if([[obj objectForKey:@"type"] isEqualToString:@"todo-list"]) {
 			//todolist path
-			[self postTodoItemsForList:obj];
+			[self postType:@"todo-items" withData:[obj objectForKey:@"todo-items"] userInfo:[NSDictionary dictionaryWithObject:obj forKey:@"todo-list"]];
 			[self incrementDone];
 		}
 		else if([[obj objectForKey:@"type"] isEqualToString:@"todo-item"]) {
@@ -368,7 +368,7 @@
 }
 -(void)processResponse:(NSHTTPURLResponse *)response forRequest:(NSURLRequest *)req {
 	// retrieve our object
-	// NSLog(@"receiving response for %@",req);
+	NSLog(@"receiving response for %@",req);
 	//NSLog(@"request sent was %@",[[[NSString alloc] initWithData:[req HTTPBody] encoding:NSASCIIStringEncoding] autorelease]);
 	NSMutableDictionary *obj = [requestHistory objectForKey:req];
 	if(([response statusCode] == [[obj objectForKey:@"expect"] intValue])) {
@@ -396,6 +396,8 @@
 	[self setStatusMessage:@"Drop Omniplan File here to Sync"];
 	[bcDictionary removeAllObjects];
 	[bcDictionary release];
+	bcDictionary = nil;
+	[OmniPlanParser reset];
 	[self setPercentComplete:100];
 	[[theApp progress] setDoubleValue:[self percentComplete]];
 	[[theApp progress] setHidden:YES];
@@ -408,6 +410,7 @@
 	// now we want to push the ids back to Omniplan throught the dependent parser
 	[self setStatusMessage:@"Pusing info into Omniplan"];
 	[[theApp statusMessage] display];
+	[[theApp progress] setIndeterminate:YES];
 	[OmniPlanParser encodeBasecamp:bcDictionary];
 	[self cleanUp];
 }

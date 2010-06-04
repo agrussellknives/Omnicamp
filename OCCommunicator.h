@@ -41,7 +41,7 @@
 	NSMutableDictionary *bcDictionary;
 	NSXMLDocument *bcXML;
 	
-	NSArray *uploadPlan;
+	NSDictionary *uploadPlan;
 	@private int uploadStep;
 	@private NSDictionary *currentStep;
 }
@@ -59,6 +59,8 @@
 @property int inAnimate;
 @property int numberOfElements;
 @property (copy) NSString *statusMessage;
+
+@property (readonly) NSMutableDictionary *bcDictionary;
 
 -(BOOL)postToBasecamp:(NSString *)filePath error:(NSError **)error;
 -(void)setFilePath:(NSString *)thePath;

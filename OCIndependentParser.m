@@ -263,5 +263,7 @@
 -(void)encodeBasecamp:(NSDictionary *)planDict {
 	return;
 }
-
+-(void)reset {
+	return;
+}
 @end

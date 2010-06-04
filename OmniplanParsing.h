@@ -13,6 +13,7 @@
 
 -(NSMutableDictionary *)decodeOmniPlan:(id)thePlan;
 -(void)encodeBasecamp:(NSDictionary *)planDict;
+-(void)reset;
 
 @property (copy) NSString *filePath;
 @property (nonatomic,assign) OCCommunicator *communicator;

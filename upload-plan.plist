@@ -1,14 +1,45 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
-<array>
+<dict>
+	<key>default</key>
 	<dict>
-		<key>type</key>
-		<string>milestone</string>
-		<key>exclude</key>
-		<array>
-			<string>objectId</string>
-		</array>
+		<key>update</key>
+		<dict>
+			<key>expect</key>
+			<string>200</string>
+			<key>qualifyingTest</key>
+			<string>id != nil</string>
+			<key>operation</key>
+			<string>PUT</string>
+			<key>exclude</key>
+			<array>
+				<string>objectId</string>
+			</array>
+		</dict>
+		<key>new</key>
+		<dict>
+			<key>expect</key>
+			<integer>201</integer>
+			<key>operation</key>
+			<string>POST</string>
+			<key>qualifyingTest</key>
+			<string>id == nil</string>
+			<key>exclude</key>
+			<array>
+				<string>id</string>
+				<string>objectId</string>
+			</array>
+		</dict>
+	</dict>
+	<key>step-order</key>
+	<array>
+		<string>milestones</string>
+		<string>todo-lists</string>
+		<string>todo-items</string>
+	</array>
+	<key>milestones</key>
+	<dict>
 		<key>new</key>
 		<dict>
 			<key>tag</key>
@@ -22,27 +53,44 @@
 				<key>vars</key>
 				<array>
 					<string>self.basecampURL</string>
-					<string>self.bcDictionary.&quot;project-id&quot;</string>
+					<string>self.bcDictionary.project-id</string>
 				</array>
 			</dict>
 		</dict>
 		<key>update</key>
-		<dict/>
+		<dict>
+			<key>operation</key>
+			<string>POST</string>
+			<key>url</key>
+			<dict>
+				<key>format</key>
+				<string>%@/milestones/update/%@</string>
+				<key>vars</key>
+				<array>
+					<string>self.basecampURL</string>
+					<string>id</string>
+				</array>
+			</dict>
+			<key>tag</key>
+			<string>milestone</string>
+			<key>enclosingTag</key>
+			<string>request</string>
+		</dict>
 		<key>get</key>
 		<dict/>
 		<key>delete</key>
 		<dict/>
 	</dict>
+	<key>todo-lists</key>
 	<dict>
-		<key>type</key>
-		<string>todo-list</string>
-		<key>exclude</key>
-		<array>
-			<string>todo-items</string>
-			<string>objectId</string>
-		</array>
 		<key>new</key>
 		<dict>
+			<key>exclude</key>
+			<array>
+				<string>id</string>
+				<string>todo-items</string>
+				<string>objectId</string>
+			</array>
 			<key>tag</key>
 			<string>todo-list</string>
 			<key>url</key>
@@ -52,28 +100,42 @@
 				<key>vars</key>
 				<array>
 					<string>self.basecampURL</string>
-					<string>self.bcDictionary.&quot;project-id&quot;</string>
+					<string>self.bcDictionary.project-id</string>
 				</array>
 			</dict>
 		</dict>
 		<key>update</key>
-		<dict/>
+		<dict>
+			<key>url</key>
+			<dict>
+				<key>format</key>
+				<string>%@/todo_lists/%@.xml</string>
+				<key>vars</key>
+				<array>
+					<string>self.basecampURL</string>
+					<string>id</string>
+				</array>
+			</dict>
+			<key>tag</key>
+			<string>todo-list</string>
+			<key>exclude</key>
+			<array>
+				<string>id</string>
+				<string>todo-items</string>
+				<string>objectId</string>
+			</array>
+		</dict>
 		<key>get</key>
 		<dict/>
 		<key>delete</key>
 		<dict/>
 	</dict>
+	<key>todo-items</key>
 	<dict>
-		<key>type</key>
-		<string>todo-items</string>
-		<key>exclude</key>
-		<array>
-			<string>objectId</string>
-		</array>
 		<key>new</key>
 		<dict>
 			<key>tag</key>
-			<string>todo_items</string>
+			<string>todo_item</string>
 			<key>url</key>
 			<dict>
 				<key>format</key>
@@ -81,16 +143,29 @@
 				<key>vars</key>
 				<array>
 					<string>self.basecampURL</string>
-					<string>todo_list.id</string>
+					<string>todo-list.id</string>
 				</array>
 			</dict>
 		</dict>
 		<key>update</key>
-		<dict/>
+		<dict>
+			<key>tag</key>
+			<string>todo_item</string>
+			<key>url</key>
+			<dict>
+				<key>format</key>
+				<string>%@/todo_items/%@.xml</string>
+				<key>vars</key>
+				<array>
+					<string>self.basecampURL</string>
+					<string>id</string>
+				</array>
+			</dict>
+		</dict>
 		<key>get</key>
 		<dict/>
 		<key>delete</key>
 		<dict/>
 	</dict>
-</array>
+</dict>
 </plist>

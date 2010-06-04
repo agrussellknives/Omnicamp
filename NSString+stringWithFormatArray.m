@@ -6,7 +6,7 @@
 //  Copyright 2010 __MyCompanyName__. All rights reserved.
 //
 
-#import "NSString+stringWithFormat:array.h"
+#import "NSString+stringWithFormatArray.h"
 
 
 @implementation NSString (stringWithFormatAcceptingArray)
@@ -18,7 +18,7 @@
 	for(id item in values) {
 		args[index++] = item;
 	}
-	return [[[NSString alloc] initWithFormat:format arguments:(va_list)values] autorelease];
+	return [[[NSString alloc] initWithFormat:format arguments:(va_list)args] autorelease];
 }
 
 @end

@@ -201,7 +201,7 @@
 						<object class="NSTextField" id="1031276347">
 							<reference key="NSNextResponder" ref="74975524"/>
 							<int key="NSvFlags">268</int>
-							<string key="NSFrame">{{17, 26}, {122, 68}}</string>
+							<string key="NSFrame">{{17, 52}, {122, 54}}</string>
 							<reference key="NSSuperview" ref="74975524"/>
 							<bool key="NSEnabled">YES</bool>
 							<object class="NSTextFieldCell" key="NSCell" id="444405387">
@@ -232,18 +232,21 @@
 						<object class="NSCustomView" id="9758173">
 							<reference key="NSNextResponder" ref="74975524"/>
 							<int key="NSvFlags">8460</int>
+							<object class="NSMutableArray" key="NSSubviews">
+								<bool key="EncodedWithXMLCoder">YES</bool>
+								<object class="NSProgressIndicator" id="66653987">
+									<reference key="NSNextResponder" ref="9758173"/>
+									<int key="NSvFlags">1292</int>
+									<object class="NSPSMatrix" key="NSDrawMatrix"/>
+									<string key="NSFrame">{{59, 20}, {32, 32}}</string>
+									<reference key="NSSuperview" ref="9758173"/>
+									<int key="NSpiFlags">20488</int>
+									<double key="NSMaxValue">1.000000e+02</double>
+								</object>
+							</object>
 							<string key="NSFrameSize">{156, 114}</string>
 							<reference key="NSSuperview" ref="74975524"/>
 							<string key="NSClassName">OCDragView</string>
-						</object>
-						<object class="NSProgressIndicator" id="66653987">
-							<reference key="NSNextResponder" ref="74975524"/>
-							<int key="NSvFlags">1292</int>
-							<object class="NSPSMatrix" key="NSDrawMatrix"/>
-							<string key="NSFrame">{{55, 20}, {32, 32}}</string>
-							<reference key="NSSuperview" ref="74975524"/>
-							<int key="NSpiFlags">20488</int>
-							<double key="NSMaxValue">1.000000e+02</double>
 						</object>
 					</object>
 					<string key="NSFrameSize">{156, 114}</string>
@@ -1018,7 +1021,6 @@
 						<object class="NSMutableArray" key="children">
 							<bool key="EncodedWithXMLCoder">YES</bool>
 							<reference ref="1031276347"/>
-							<reference ref="66653987"/>
 							<reference ref="9758173"/>
 						</object>
 						<reference key="parent" ref="395984283"/>
@@ -1113,6 +1115,7 @@
 						<reference key="object" ref="9758173"/>
 						<object class="NSMutableArray" key="children">
 							<bool key="EncodedWithXMLCoder">YES</bool>
+							<reference ref="66653987"/>
 						</object>
 						<reference key="parent" ref="74975524"/>
 					</object>
@@ -1257,14 +1260,14 @@
 						<reference key="parent" ref="233435816"/>
 					</object>
 					<object class="IBObjectRecord">
-						<int key="objectID">519</int>
-						<reference key="object" ref="66653987"/>
-						<reference key="parent" ref="74975524"/>
-					</object>
-					<object class="IBObjectRecord">
 						<int key="objectID">521</int>
 						<reference key="object" ref="734236069"/>
 						<reference key="parent" ref="1049"/>
+					</object>
+					<object class="IBObjectRecord">
+						<int key="objectID">519</int>
+						<reference key="object" ref="66653987"/>
+						<reference key="parent" ref="9758173"/>
 					</object>
 				</object>
 			</object>

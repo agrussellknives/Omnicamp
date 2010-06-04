@@ -127,6 +127,9 @@
 				for(childTask in childTasks) {
 					NSMutableDictionary *todoItem = [NSMutableDictionary dictionaryWithCapacity:4];
 					id todo_basecampId = [[[childTask customData] getItem] objectForKey:@"Basecamp ID"];
+					if(todo_basecampId == [OPConstant missingValue]) {
+						todo_basecampId = nil;
+					}
 					[todoItem setObject:[[childTask name] getItem] forKey:@"content"];
 					[todoItem setObject:[[childTask endingDate] getItem] forKey:@"due-at"];
 					NSString *responsibleParty;
@@ -168,6 +171,9 @@
 	 in omniplan they are posted into a todo_list called "general tasks" */
 	NSArray *freeTasks = [[[[[OmniPlanApp documents] byID:fileId] childTasks] byTest:[[OPIts taskType] equals:[OPConstant standardTask]]] getItem];
 	id basecampId = [[[[[[OmniPlanApp documents] byID:fileId] project] customData] getItem] objectForKey:@"General Tasks Basecamp ID"];
+	if(basecampId == [OPConstant missingValue]) {
+		basecampId = nil;
+	}
 	// restrict scope
 	if([freeTasks count] > 0) {
 		NSMutableDictionary *todolistDict = [NSMutableDictionary dictionaryWithCapacity:4];
@@ -180,6 +186,9 @@
 		for(task in freeTasks) {
 			NSMutableDictionary *todoItem = [NSMutableDictionary dictionaryWithCapacity:4];
 			id todo_basecampId = [[[task customData] getItem] objectForKey:@"Basecamp ID"];
+			if(todo_basecampId == [OPConstant missingValue]) {
+				todo_basecampId = nil;
+			}
 			[todoItem setObject:[[task name] getItem] forKey:@"content"];
 			[todoItem setObject:[[task endingDate] getItem] forKey:@"due-at"];
 			NSString *responsibleParty;
@@ -294,6 +303,11 @@
 	else {
 		[opTask setItem:[NSDictionary dictionaryWithObject:bcID forKey:@"Basecamp ID"]];
 	}
+}
+
+-(void)reset {
+	[milestones removeAllObjects];
+	[todoLists removeAllObjects];
 }
 																	
 @end
