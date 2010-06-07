@@ -30,7 +30,7 @@
 -(void)postType:(NSString *)type withData:(NSArray *)data userInfo:(NSDictionary *)info;
 -(void)nextStepFromKey:(NSString *)key;
 -(void)cleanUp;
-
+-(void)updateType:(NSString *)type withData:(NSArray *)data userInfo:(NSDictionary *)info;
 -(void)urlOp:(NSString *)op withType:(NSString *)type withData:(NSArray *)data userInfo:(NSDictionary *)info;  
 @end;
 
@@ -51,6 +51,9 @@
 @synthesize statusMessage;
 @synthesize bcDictionary;
 
+@synthesize uploadPlan;
+
+
 -(id)init {
 	if(self = [super init]) {
 		requestTemplate = [[NSMutableURLRequest alloc] initWithURL:[NSURL URLWithString:@""]];
@@ -58,6 +61,10 @@
 			initWithKeyOptions:NSPointerFunctionsStrongMemory|NSPointerFunctionsObjectPointerPersonality
 			valueOptions:NSPointerFunctionsStrongMemory|NSPointerFunctionsObjectPointerPersonality
 			capacity:2];
+			
+		uploadPlan = [[NSDictionary alloc] initWithContentsOfFile:
+			[[NSBundle mainBundle] pathForResource:@"upload-plan" ofType:@"plist"]];
+
 		requestor = [OCThrottledRequestor sharedThrottledRequestor];
 		[requestor setDelegate:self];
 		[self setStatusMessage:@"Drop Omniplan file here to Sync."];
@@ -69,11 +76,14 @@
 		numberDone = 0;
 		uploadStep = 0;
 		currentStep = nil;
-	}
+			}
 	return self;
 }
 
 -(void)dealloc {
+	[requestTemplate release];
+	[requestHistory release];
+	[uploadPlan release];
 	[OmniPlanParser release];
 	[super dealloc];
 }
@@ -170,8 +180,7 @@
 
 	[self setStatusMessage:@"Posting information to Basecamp"];
 	
-	uploadPlan = [[NSDictionary alloc] initWithContentsOfFile:
-		[[NSBundle mainBundle] pathForResource:@"upload-plan" ofType:@"plist"]];
+
 	
 	NSArray *generalTasks = [[bcDictionary objectForKey:@"todo-lists"] filteredArrayUsingPredicate:
 		[NSPredicate predicateWithFormat:@"objectId == -1"]];
@@ -187,10 +196,7 @@
 }
 
 -(void)nextStepFromKey:(NSString *)key {
-	if(currentStep) {
-		[currentStep release];
-	}
-	NSArray *stepArray = [uploadPlan objectForKey:@"step-order"];
+	NSArray *stepArray = [[self uploadPlan] objectForKey:@"step-order"];
 	NSString *stepKey;
 	if(key) {
 		stepKey = [stepArray objectAtIndex:([stepArray indexOfObject:key]+1)];
@@ -198,7 +204,7 @@
 		stepKey = [stepArray objectAtIndex:0];
 	}
 	
-	currentStep = [uploadPlan objectForKey:stepKey];
+	currentStep = [[self uploadPlan] objectForKey:stepKey];
 	
 	uploadStep++;
 	[self postType:stepKey withData:[bcDictionary objectForKey:stepKey]];	
@@ -246,11 +252,11 @@
 }
 
 -(void)urlOp:(NSString *)op withType:(NSString *)type withData:(NSArray *)data userInfo:(NSDictionary *)info {
-	NSLog(@"%@ %@",op,type);
+	// NSLog(@"%@ %@",op,type);
 	// predicate array with the qualifiying test.
-	currentStep = [uploadPlan objectForKey:type];
+	currentStep = [[self uploadPlan] objectForKey:type];
 	NSMutableDictionary *settingsDict = [NSMutableDictionary dictionaryWithDictionary:
-		[uploadPlan valueForKeyPath:[@"default." stringByAppendingString:op]]];
+		[[self uploadPlan] valueForKeyPath:[@"default." stringByAppendingString:op]]];
 	[settingsDict addEntriesFromDictionary:[currentStep valueForKeyPath:op]];
 	
 	NSPredicate *qualifiyingTest = [NSPredicate predicateWithFormat:[settingsDict valueForKeyPath:@"qualifyingTest"]];
@@ -277,9 +283,12 @@
 			itemDoc = [NSXMLDocument documentWithRootElement:itemEl];
 		}
 		[req setHTTPBody:[itemDoc XMLData]];
+		[req setHTTPMethod:[settingsDict valueForKeyPath:@"operation"]];
+
 		[item setObject:[settingsDict valueForKeyPath:@"expect"] forKey:@"expect"];
 		[item setObject:[[ActiveSupportInflector sharedActiveSupportInflector] singularize:type] forKey:@"type"];
-		[item setObject:[settingsDict valueForKeyPath:@"operation"] forKey:@"operation"];
+		[item setObject:op forKey:@"operation"];
+
 		[requestHistory setObject:item forKey:req];
 		[requestor addRequestToQueue:req withOwner:self];
 		[req release]; // retained by the map;
@@ -287,19 +296,20 @@
 }
 		
 -(void)handleUnexpectedResponse:(NSHTTPURLResponse *)response forRequest:(NSURLRequest *)req {
-	NSLog(@"unexpected response code");
+	// NSLog(@"unexpected response code");
 	switch([response statusCode]) {
 		case 404:
 			[requestor clearAndStopQueue];
 			/* this error cannot be recovered */
 			NSRunAlertPanel(@"Basecamp 404 Error", @"Basecamp returned a 404.  Are you sure you typed your URL in correctly?",
 				nil, nil, nil);
+			[self cleanUp];
 			break;
 		case 401:
 			[requestor clearAndStopQueue];
 			NSRunAlertPanel(@"Basecamp Authentication Error", @"Basecamp couldn't log you in, did you type your user name and password correctly?",
 				nil, nil, nil);
-
+			[self cleanUp];
 			break;
 		case 503:
 			NSLog(@"Basecamp delay.");
@@ -308,21 +318,33 @@
 			[requestor stopQueue];
 			[requestor resumeAfter:delay_by * 1.5]; // wait 50% too long just o be on the safe side
 			[requestor addRequestToQueue:req withOwner:self];
+			[self cleanUp];
 			break;
 		case 302:
 			[self setBasecampURL:[[response allHeaderFields] objectForKey:@"Location"]];
 			[requestor addRequestToQueue:req];
+			[self cleanUp];
 			break;
 		case 400:
 			[requestor clearAndStopQueue];
 			[NSException raise:@"Malformed Request" format:@"%@ not a good request",req];
+			[self cleanUp];
+			break;
+		case 500:
+			// We want to see the error information for these response, so we'll let the
+			// processData function clear and stop the Queue
+			NSLog(@"%@",[[[NSString alloc] initWithData:[req HTTPBody] encoding:NSASCIIStringEncoding] autorelease]);
+			NSLog(@"%@",[response allHeaderFields]);
+			NSRunAlertPanel(@"Sync Error", @"Basecamp returned a 500 error.  Possible causes of this are\n"
+				"Basecamp IDs on Unposted Tasks\n"
+				"Tasks with identical Basecamp IDs\n", nil, nil, nil);
+			break;
 		default:
-			[requestor clearAndStopQueue];
+			NSLog(@"%d",[response statusCode]);
 			NSLog(@"Offending Request: %@",[[[NSString alloc] initWithData:[req HTTPBody] encoding:NSASCIIStringEncoding] autorelease]);
-			NSRunAlertPanel(@"Basecamp Error", @"Basecamp returned a status code indicating an error, but we're not 100% sure what happened.",
+			NSRunAlertPanel(@"Basecamp Error", @"Basecamp returned a status code indicating an error, but we're not 100%% sure what happened.",
 				nil,nil,nil);
 	}
-	[self cleanUp];
 }
 			
 
@@ -333,16 +355,24 @@
 	NSError *error = nil;
 	if([[obj objectForKey:@"expect"] isEqualToString:@"ok"]) {
 		if([[obj objectForKey:@"type"] isEqualToString:@"milestone"]) {
-			// milestone path
-			NSXMLDocument *msRDoc = [[NSXMLDocument alloc] initWithData:data options:0 error:&error];
-			// since we only create one milestone at a time, there should only be one of these.
-			NSXMLNode *bcId = [[msRDoc nodesForXPath:@"//id" error:&error] objectAtIndex:0];
+			int objectId;
+			NSString *bcIdInt;
 			NSMutableDictionary *todo_list;
-			// create int values for the ids.
-			int objectId = [[obj objectForKey:@"objectId"] intValue];
-			NSString *bcIdInt = [bcId stringValue];
-			// set the basecamp id of our reference object
-			[obj setObject:bcIdInt forKey:@"id"];
+
+			// if it's a newly created item, set the id to the returned basecamp id
+			if([[obj objectForKey:@"operation"] isEqualToString:@"new"]) {
+				NSXMLDocument *msRDoc = [[NSXMLDocument alloc] initWithData:data options:0 error:&error];
+				NSXMLNode *bcId = [[msRDoc nodesForXPath:@"//id" error:&error] objectAtIndex:0];
+
+				objectId = [[obj objectForKey:@"objectId"] intValue];
+				bcIdInt = [bcId stringValue];
+				// set the basecamp id of our reference object
+				[obj setObject:bcIdInt forKey:@"id"];
+			}
+			else {
+				bcIdInt = [obj objectForKey:@"id"];
+			}
+				
 			NSArray *dpTodos = [[bcDictionary objectForKey:@"todo-lists"] filteredArrayUsingPredicate:
 				[NSPredicate predicateWithFormat:@"%K == %@ OR %K == %d",@"milestone-id",bcIdInt,@"milestone-id",objectId]];
 			for(todo_list in dpTodos) {
@@ -363,36 +393,41 @@
 	}
 	else {
 		NSLog(@"recieved data for request which wasn't honored.");
+		NSLog(@"%@",[req allHTTPHeaderFields]);
 		NSLog(@"%@",[[[NSString alloc] initWithData:data encoding:NSASCIIStringEncoding] autorelease]);
+		[requestor clearAndStopQueue];
 	}
 }
 -(void)processResponse:(NSHTTPURLResponse *)response forRequest:(NSURLRequest *)req {
 	// retrieve our object
-	NSLog(@"receiving response for %@",req);
 	//NSLog(@"request sent was %@",[[[NSString alloc] initWithData:[req HTTPBody] encoding:NSASCIIStringEncoding] autorelease]);
 	NSMutableDictionary *obj = [requestHistory objectForKey:req];
+	// nsNSLog(@"recevied %d response for %@ request to %@",[response statusCode],[obj objectForKey:@"operation"],req);
 	if(([response statusCode] == [[obj objectForKey:@"expect"] intValue])) {
 		[obj setObject:@"ok" forKey:@"expect"];
 		// milestones return created object data in DATA rather than in the location.
-		// PITA.
-		if(![[obj objectForKey:@"type"] isEqualToString:@"milestone"]) {
-			ActiveSupportInflector *aci = [ActiveSupportInflector sharedActiveSupportInflector];
-			NSString *pluralTypeURL = [[aci pluralize:[obj objectForKey:@"type"]] 
-				stringByReplacingOccurrencesOfString:@"-" withString:@"_"];
-			NSString *location = [[response allHeaderFields] objectForKey:@"Location"];
-			NSString *locationRegex = [NSString stringWithFormat:@".*?%@\\/(\\d*)",pluralTypeURL];
-			// the first location is the entire string...
-			NSString *newId = [[location captureComponentsMatchedByRegex:locationRegex] objectAtIndex:1];
-			[obj setObject:newId forKey:@"id"];
+		if([[obj objectForKey:@"operation"] isEqualToString:@"new"]) {
+			// if it's a newly created item, set the id to the returned basecamp id
+			if(![[obj objectForKey:@"type"] isEqualToString:@"milestone"]) {
+				ActiveSupportInflector *aci = [ActiveSupportInflector sharedActiveSupportInflector];
+				NSString *pluralTypeURL = [[aci pluralize:[obj objectForKey:@"type"]] 
+					stringByReplacingOccurrencesOfString:@"-" withString:@"_"];
+				NSString *location = [[response allHeaderFields] objectForKey:@"Location"];
+				NSString *locationRegex = [NSString stringWithFormat:@".*?%@\\/(\\d*)",pluralTypeURL];
+				// the first location is the entire string, so use index 1.
+				NSString *newId = [[location captureComponentsMatchedByRegex:locationRegex] objectAtIndex:1];
+				[obj setObject:newId forKey:@"id"];
+			}
 		}
 	}
 	else {
+		[obj setObject:@"error" forKey:@"expect"];
 		[self handleUnexpectedResponse:response forRequest:req];
 	}
 }
 
 -(void)cleanUp {
-	NSLog(@"cleaning up self");
+	// NSLog(@"cleaning up self");
 	[self setStatusMessage:@"Drop Omniplan File here to Sync"];
 	[bcDictionary removeAllObjects];
 	[bcDictionary release];
@@ -406,11 +441,12 @@
 }
 
 -(void)throttledRequestorDidEmptyQueue:(OCThrottledRequestor *)requestor {
-	NSLog(@"queue was emptied");
+	// NSLog(@"queue was emptied");
 	// now we want to push the ids back to Omniplan throught the dependent parser
 	[self setStatusMessage:@"Pusing info into Omniplan"];
 	[[theApp statusMessage] display];
 	[[theApp progress] setIndeterminate:YES];
+	[[theApp progress] display];
 	[OmniPlanParser encodeBasecamp:bcDictionary];
 	[self cleanUp];
 }

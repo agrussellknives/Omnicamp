@@ -61,7 +61,7 @@
 			[self dependencyForChildren:foundTask taskId:taskId];
 		}
 		if([task objectForKey:@"todo-items"]) {
-			NSLog(@"task has both direct childen and group children");
+			// NSLog(@"task has both direct childen and group children");
 			[task setObject:taskId forKey:@"milestone-id"];
 		}
 	}
@@ -220,13 +220,13 @@
 		NSNumber *taskId;
 		basecampId = [milestone objectForKey:@"id"];
 		taskId = [milestone objectForKey:@"objectId"];
-		NSLog(@"%@",taskId);
+		// NSLog(@"%@",taskId);
 		// i use prs, pr because i can't specll prerequiisits.
 		NSArray *prs = [[[[[[[OmniPlanApp documents] byID:fileId] project] tasks] byID:taskId] prerequisites] getItem];
 		OPReference *pr;
 		for(pr in prs) {
 			NSNumber *dependsOn = [[[pr prerequisiteTask] id_] getItem];
-			NSLog(@"%@",dependsOn);\
+			// NSLog(@"%@",dependsOn);
 			NSArray *onMilestone = [todoLists filteredArrayUsingPredicate:
 				[NSPredicate predicateWithFormat:@"SELF.objectId == %d",[dependsOn intValue]]
 			];

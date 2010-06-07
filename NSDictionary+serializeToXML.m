@@ -53,7 +53,7 @@
 }
 
 -(NSXMLElement *)serializeToXMLFragment {
-	NSLog(@"Converted a dict to XML without explicit tag name.  Really?");
+	// NSLog(@"Converted a dict to XML without explicit tag name.  Really?");
 	return [self serializeToXMLFragmentUsingTagName:@"item"];
 }
 

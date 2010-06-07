@@ -35,7 +35,7 @@
 }
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
-	NSLog(keyPath);
+	// NSLog(keyPath);
 	if([keyPath compare:@"userName"] == NSOrderedSame) {
 		[theCommunicator setUserName:[[[NSUserDefaultsController sharedUserDefaultsController] values] valueForKey:@"userName"]];
 	}
@@ -46,14 +46,14 @@
 		[theCommunicator setBasecampURL:[[[NSUserDefaultsController sharedUserDefaultsController] values] valueForKey:@"basecampURL"]];
 	}
 	else if ([keyPath compare:@"useScripting"] == NSOrderedSame) {
-		NSLog(@"setting useScripting");
+		// NSLog(@"setting useScripting");
 		[theCommunicator setUseScripting:[(NSNumber *)[[[NSUserDefaultsController sharedUserDefaultsController] values] valueForKey:@"useScripting"] intValue]];
 	}
 	else if ([keyPath compare:@"trackTime"] == NSOrderedSame) {
 		[theCommunicator setTrackTime:[(NSNumber *)[[[NSUserDefaultsController sharedUserDefaultsController] values] valueForKey:@"trackTime"] intValue]];
 	}
 	else if ([keyPath compare:@"notifyAssignees"] == NSOrderedSame) {
-		NSLog(@"setting notifyAssignees");
+		// NSLog(@"setting notifyAssignees");
 		[theCommunicator setNotifyAssignees:[(NSNumber *)[[[NSUserDefaultsController sharedUserDefaultsController] values] valueForKey:@"notifyAssignees"] intValue]];
 	}
 	[theCommunicator updateRequestTemplate];
@@ -67,8 +67,9 @@
 	return statusMessage;
 }
 
-- (void)applicationDidFinishLaunching:(NSNotification *)aNotification {
+-(void)applicationDidFinishLaunching:(NSNotification *)aNotification {
 	[theCommunicator updateRequestTemplate];
 }
+
 
 @end

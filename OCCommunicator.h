@@ -37,11 +37,10 @@
 	NSMutableURLRequest *requestTemplate;
 	OCThrottledRequestor *requestor;
 	NSMapTable *requestHistory;
+	NSDictionary *uploadPlan;
 	
 	NSMutableDictionary *bcDictionary;
 	NSXMLDocument *bcXML;
-	
-	NSDictionary *uploadPlan;
 	@private int uploadStep;
 	@private NSDictionary *currentStep;
 }
@@ -61,6 +60,7 @@
 @property (copy) NSString *statusMessage;
 
 @property (readonly) NSMutableDictionary *bcDictionary;
+@property (readonly) NSDictionary *uploadPlan;
 
 -(BOOL)postToBasecamp:(NSString *)filePath error:(NSError **)error;
 -(void)setFilePath:(NSString *)thePath;

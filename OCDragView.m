@@ -35,17 +35,17 @@
 	// safari returns NSDragOperationAll_Obselete instead of "every" here, so we have
 	// to look for it to.
 	if((NSDragOperationAll_Obsolete & [sender draggingSourceOperationMask]) || (NSDragOperationEvery & [sender draggingSourceOperationMask])){
-		NSLog(@"returning generic");
+		// NSLog(@"returning generic");
 		return NSDragOperationGeneric;
 	}
 	else {
-		NSLog(@"returning none");
+		// NSLog(@"returning none");
 		return NSDragOperationNone;
 	}
 }
 
 -(BOOL)prepareForDragOperation:(id <NSDraggingInfo>)sender {
-	NSLog(@"called prepare");
+	// NSLog(@"called prepare");
 	// do not accept drag unless username and password are set to SOMETHING.
 	if([theCommunicator userName] && [theCommunicator passWord]) {
 		return YES;
@@ -81,7 +81,7 @@
 			[theCommunicator postToBasecamp:path error:&error];
 		}
 		if([desiredType isEqualToString:NSURLPboardType]) {
-			NSLog(@"not implemented yet");
+			// NSLog(@"not implemented yet");
 		}
 	}
 	return NO;
