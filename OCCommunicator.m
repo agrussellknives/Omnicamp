@@ -342,7 +342,10 @@
 		default:
 			NSLog(@"%d",[response statusCode]);
 			NSLog(@"Offending Request: %@",[[[NSString alloc] initWithData:[req HTTPBody] encoding:NSASCIIStringEncoding] autorelease]);
-			NSRunAlertPanel(@"Basecamp Error", @"Basecamp returned a status code indicating an error, but we're not 100%% sure what happened.",
+			NSRunAlertPanel(
+				[NSString stringWithFormat:@"Basecamp Error", @"Basecamp returned a status code %d indicating an error,"
+					"but we're not 100%% sure what happened. Information is available in the Console.",
+					[response statusCode]],
 				nil,nil,nil);
 	}
 }
