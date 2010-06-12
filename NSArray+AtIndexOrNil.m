@@ -3,7 +3,7 @@
 //  OmniCamp
 //
 //  Created by Stephen Prater - new on 5/25/10.
-//  Copyright 2010 __MyCompanyName__. All rights reserved.
+//  Copyright 2010 A. G. Russell Knives All rights reserved.
 //
 
 #import "NSArray+AtIndexOrNil.h"
